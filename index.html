@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Мои олимпиады</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:var(--tg-theme-bg-color,#ffffff);
+  --bg2:var(--tg-theme-secondary-bg-color,#f1f2f6);
+  --text:var(--tg-theme-text-color,#111111);
+  --hint:var(--tg-theme-hint-color,#8a8f98);
+  --link:var(--tg-theme-link-color,#2481cc);
+  --btn:var(--tg-theme-button-color,#2481cc);
+  --btnt:var(--tg-theme-button-text-color,#ffffff);
+  --danger:var(--tg-theme-destructive-text-color,#e5484d);
+  --card:var(--tg-theme-section-bg-color,var(--bg));
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:var(--tg-theme-bg-color,#17212b);
+    --bg2:var(--tg-theme-secondary-bg-color,#0e1621);
+    --text:var(--tg-theme-text-color,#f5f5f5);
+    --hint:var(--tg-theme-hint-color,#7d8b99);
+    --card:var(--tg-theme-section-bg-color,#17212b);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg2);color:var(--text);
+  font:15px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--text);background:var(--bg2);border:1px solid transparent;
+  border-radius:10px;padding:10px 12px;width:100%;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--btn)}
+.tabs{position:sticky;top:0;z-index:5;display:flex;gap:4px;padding:10px 12px;background:var(--bg2)}
+.tab{flex:1;padding:8px 0;border-radius:10px;color:var(--hint);font-weight:600;font-size:14px}
+.tab.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+main{padding:0 12px 96px}
+.group{margin:14px 4px 6px;font-size:13px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.03em}
+.list{background:var(--card);border-radius:14px;overflow:hidden}
+.row{display:flex;align-items:center;gap:10px;padding:11px 12px;width:100%;text-align:left}
+.row+.row{border-top:1px solid color-mix(in srgb,var(--hint) 20%,transparent)}
+.bar{width:4px;align-self:stretch;border-radius:2px;flex:none}
+.grow{flex:1;min-width:0}
+.title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{color:var(--hint);font-size:13px;margin-top:1px}
+.right{text-align:right;flex:none;font-size:13px}
+.badge{display:inline-block;padding:2px 7px;border-radius:999px;font-size:12px;font-weight:600;margin-top:3px}
+.b-now{background:var(--btn);color:var(--btnt)}
+.b-soon{background:color-mix(in srgb,#f59e0b 22%,transparent);color:#d97706}
+.b-later{background:color-mix(in srgb,var(--hint) 18%,transparent);color:var(--hint)}
+.b-reg{color:#d97706;font-weight:600}
+.empty{text-align:center;color:var(--hint);padding:48px 24px}
+.empty b{display:block;color:var(--text);font-size:17px;margin-bottom:6px}
+.link{color:var(--link);font-weight:600;padding:12px 4px}
+.fab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;
+  background:var(--btn);color:var(--btnt);font-size:30px;line-height:56px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:6}
+/* calendar */
+.cal{background:var(--card);border-radius:14px;padding:10px 8px 8px;margin-top:4px}
+.cal-h{display:flex;align-items:center;justify-content:space-between;padding:0 6px 8px}
+.cal-h b{font-size:16px}
+.nav{width:36px;height:32px;border-radius:8px;font-size:20px;color:var(--link)}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.wd{text-align:center;font-size:11px;color:var(--hint);padding:4px 0}
+.day{height:46px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px;font-size:15px}
+.day.out{visibility:hidden}
+.day.today{color:var(--btn);font-weight:700}
+.day.sel{background:var(--btn);color:var(--btnt)}
+.dots{display:flex;gap:3px;margin-top:4px;height:6px}
+.dot{width:6px;height:6px;border-radius:50%}
+/* cards */
+.card{background:var(--card);border-radius:14px;padding:12px 14px;margin-top:8px;width:100%;text-align:left;display:block}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px}
+/* editor */
+#editor{position:fixed;inset:0;background:var(--bg2);z-index:20;overflow-y:auto;display:none;padding:12px 12px 120px}
+#editor.open,#imp.open{display:block}
+#imp{position:fixed;inset:0;background:var(--bg2);z-index:30;overflow-y:auto;display:none;padding:12px}
+.ed-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ed-h b{font-size:18px}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:13px;color:var(--hint);margin:0 4px 4px}
+.box{background:var(--card);border-radius:14px;padding:12px;margin-bottom:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stage{border-top:1px solid color-mix(in srgb,var(--hint) 20%,transparent);padding-top:10px;margin-top:10px}
+.stage:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.st-h{display:flex;gap:8px;margin-bottom:8px}
+.del{color:var(--danger);font-weight:600;padding:8px}
+.btn{display:block;width:100%;padding:13px;border-radius:12px;background:var(--btn);color:var(--btnt);font-weight:600}
+.btn2{display:block;width:100%;padding:12px;border-radius:12px;color:var(--link);font-weight:600;background:var(--card)}
+.ed-foot{position:fixed;left:0;right:0;bottom:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:var(--bg2);z-index:21;display:none}
+#editor.open + .ed-foot{display:block}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;
+  padding:9px 14px;border-radius:10px;font-size:14px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.pinm{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:none;align-items:center;justify-content:center;padding:16px}
+.pinm.open{display:flex}
+.pinbox{background:var(--card);border-radius:16px;padding:16px;width:100%;max-width:340px}
+.pinbox b{display:block;font-size:17px;margin-bottom:4px}
+.pinbox input{margin:12px 0;font-size:20px;letter-spacing:.2em;text-align:center}
+.cred-row{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.cred-row input{flex:1}
+.ibtn{flex:none;width:42px;height:42px;border-radius:10px;background:var(--bg2);font-size:17px}
+</style>
+</head>
+<body>
+<div class="tabs">
+  <button class="tab on" data-tab="up">Ближайшие</button>
+  <button class="tab" data-tab="cal">Календарь</button>
+  <button class="tab" data-tab="all">Все</button>
+</div>
+<main id="main"></main>
+<button class="fab" id="fab" aria-label="Добавить олимпиаду">+</button>
+
+<div id="editor"></div>
+<div class="ed-foot"><button class="btn" id="saveBtn">Сохранить</button></div>
+<div id="imp">
+  <div class="ed-h"><button class="link" id="impCancel" style="padding:4px">Отмена</button><b>Импорт</b><span style="width:56px"></span></div>
+  <div class="box"><div class="sub" style="margin-bottom:8px">Вставь текст, который прислал Claude. Олимпиады с тем же id обновятся, новые добавятся.</div>
+    <textarea id="impText" rows="12" placeholder='[{"name":"…","stages":[…]}]'></textarea></div>
+  <button class="btn" id="impDo">Импортировать</button>
+</div>
+<div class="pinm" id="pinModal"><div class="pinbox">
+  <b id="pinTitle"></b><div class="sub" id="pinHint"></div>
+  <input id="pinInput" type="password" inputmode="numeric" autocomplete="off" maxlength="12">
+  <div class="two"><button class="btn2" id="pinCancel">Отмена</button><button class="btn" id="pinOk">OK</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+const inTG = !!(tg && tg.initData);
+if (tg) { tg.ready(); tg.expand(); }
+
+const SUBJECTS = {
+  'Физика':'#3b82f6','Математика':'#ef4444','Экономика':'#22c55e',
+  'Информатика':'#a855f7','Русский язык':'#f59e0b','Другое':'#94a3b8'
+};
+const STAGE_TYPES = ['Регистрация','Отборочный этап','Региональный этап','Заключительный этап','Результаты','Другое'];
+const LEVELS = {'1':'I уровень','2':'II уровень','3':'III уровень','vsosh':'ВсОШ','0':'Вне перечня'};
+const MON_G = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const MON_N = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const WD = ['пн','вт','ср','чт','пт','сб','вс'];
+
+let olys = [];
+let draft = null;
+const now = new Date();
+const state = { tab:'up', y:now.getFullYear(), m:now.getMonth(), sel:ymd(now), showPast:false };
+
+/* ---------- utils ---------- */
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function today(){return ymd(new Date())}
+function parse(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
+function diffDays(a,b){return Math.round((Date.UTC(...ymdParts(b))-Date.UTC(...ymdParts(a)))/864e5)}
+function ymdParts(s){const [y,m,d]=s.split('-').map(Number);return [y,m-1,d]}
+function fmt(s){const d=parse(s);return d.getDate()+' '+MON_G[d.getMonth()].slice(0,3)+', '+WD[(d.getDay()+6)%7]}
+function fmtRange(a,b){return b&&b!==a?fmt(a)+' — '+fmt(b):fmt(a)}
+function plural(n,f){const m10=n%10,m100=n%100;return f[(m10===1&&m100!==11)?0:(m10>=2&&m10<=4&&(m100<10||m100>=20))?1:2]}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function color(o){return SUBJECTS[o.subject]||SUBJECTS['Другое']}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function haptic(t){try{tg&&tg.HapticFeedback&&tg.HapticFeedback.notificationOccurred(t)}catch(e){}}
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200)}
+function confirmAsk(msg){return new Promise(r=>{if(inTG&&tg.showConfirm)tg.showConfirm(msg,r);else r(confirm(msg))})}
+
+/* ---------- storage: Telegram CloudStorage + localStorage cache ---------- */
+const useCS = inTG && tg.CloudStorage && tg.isVersionAtLeast && tg.isVersionAtLeast('6.9');
+function csCall(method,...args){return new Promise((res,rej)=>tg.CloudStorage[method](...args,(err,v)=>err?rej(err):res(v)))}
+function lsSave(){try{localStorage.setItem('olymp_v1',JSON.stringify(olys))}catch(e){}}
+function lsLoad(){try{return JSON.parse(localStorage.getItem('olymp_v1'))||[]}catch(e){return []}}
+
+/* Стартовые олимпиады — добавляются один раз (удалённые не вернутся) */
+const SEED_VER='seed1';
+const SEED=[
+  {id:'phystech_phys',name:'Физтех',subject:'Физика',level:'1',site:'https://olymp.mipt.ru',
+   note:'Прошёл на заключительный этап. Финал очный.',
+   stages:[{type:'Заключительный этап',name:'очно',date:'2027-02-13',end:'',time:''}]},
+  {id:'phystech_math',name:'Физтех',subject:'Математика',level:'1',site:'https://olymp.mipt.ru',
+   note:'Прошёл на заключительный этап. Финал очный.',
+   stages:[{type:'Заключительный этап',name:'очно',date:'2027-02-14',end:'',time:''}]},
+  {id:'shvb_phys',name:'Шаг в будущее (МГТУ им. Баумана)',subject:'Физика',level:'2',site:'https://olymp.bmstu.ru/ru/physics-olymp',
+   note:'Прошёл на заключительный этап. Дату финала следить на сайте и в их Telegram-канале.',
+   stages:[{type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]},
+  ...[
+    ['vp_math','Математика','Математика',[['2 тур','2026-11-20','09:00']]],
+    ['vp_bus','Основы бизнеса','Экономика',[['2 тур','2026-11-13','11:30']]],
+    ['vp_eco','Экономика','Экономика',[['2 тур (16-го занят ШВБ — пишу 21-го)','2026-11-21','15:30']]],
+    ['vp_eng','Инженерные науки','Физика',[['2 тур','2026-11-15','15:00']]],
+    ['vp_fin','Финансовая грамотность','Экономика',[['2 тур','2026-11-22','13:00']]]
+  ].map(([id,prof,subj,tours])=>({id,name:'Высшая проба — '+prof,subject:subj,level:'',site:'https://olymp.hse.ru/mmo/',
+    note:'Прошёл на 2 тур отборочного этапа (онлайн, время МСК). Финал очно 5–15 фев 2027, точная дата профиля — в расписании на сайте.',
+    stages:[...tours.map(([n,d,t])=>({type:'Отборочный этап',name:n,date:d,end:'',time:t})),
+      {type:'Заключительный этап',name:'очно, окно 5–15 фев',date:'',end:'',time:''}]})),
+  {id:'vern_eco',name:'Олимпиада Вернадского',subject:'Экономика',level:'1',urgent:true,site:'https://vernadsky.info',
+   note:'Зарегистрироваться до 8 февраля.',
+   stages:[{type:'Регистрация',name:'',date:'2026-11-08',end:'2027-02-08',time:''},
+     {type:'Отборочный этап',name:'',date:'2027-02-28',end:'',time:''},
+     {type:'Заключительный этап',name:'',date:'2027-04-03',end:'',time:''}]},
+  {id:'mission_eco',name:'Миссия выполнима (Финуниверситет)',subject:'Экономика',level:'',urgent:true,
+   site:'https://www.fa.ru/for-applicants/olympiads/mission/',note:'Зарегистрирован. Отбор заочный, через интернет.',
+   stages:[{type:'Регистрация',name:'',date:'2026-09-14',end:'2026-11-30',time:'',done:true},
+     {type:'Отборочный этап',name:'заочно',date:'2026-12-05',end:'2026-12-06',time:''},
+     {type:'Заключительный этап',name:'',date:'',end:'',time:''}]},
+  {id:'mosh_eco',name:'МОШ по экономике',subject:'Экономика',level:'3',urgent:true,site:'https://olimpiada.ru/activity/110',
+   note:'Расписание 2026/27 ещё не опубликовано — проверять. Для 11 класса: заочный отбор, потом очный финал.',
+   stages:[{type:'Регистрация',name:'',date:'',end:'',time:''},
+     {type:'Отборочный этап',name:'заочно',date:'',end:'',time:''},
+     {type:'Заключительный этап',name:'',date:'',end:'',time:''}]},
+  ...[
+    ['lomo_math','Математика','Математика','2026-11-13','2026-11-20'],
+    ['lomo_bus','Предпринимательство','Экономика','2026-11-20','2026-11-27'],
+    ['lomo_phys','Физика','Физика','2026-11-27','2026-12-04']
+  ].map(([id,prof,subj,a,b])=>({id,name:'Ломоносов — '+prof,subject:subj,level:'',site:'https://olymp.msu.ru/',
+    note:'Зарегистрирован. Отборочный этап онлайн — написать в окне дат.',
+    stages:[{type:'Регистрация',name:'',date:'2026-10-24',end:b,time:'',done:true},
+      {type:'Отборочный этап',name:'онлайн',date:a,end:b,time:''},
+      {type:'Заключительный этап',name:'',date:'',end:'',time:''}]})),
+  {id:'phystech_eng',name:'Физтех.Инженер',subject:'Физика',level:'2',site:'https://olymp.mipt-rse.ru',
+   note:'Отбор написан 8 ноября — ждать результатов. Финал очно: 6 задач.',
+   stages:[{type:'Регистрация',name:'',date:'2026-11-08',end:'',time:'',done:true},
+     {type:'Отборочный этап',name:'I тур онлайн',date:'2026-11-08',end:'',time:'',done:true},
+     {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]},
+  {id:'bibn_phys',name:'Будущие исследователи — будущее науки (Би-Бн)',subject:'Физика',level:'3',urgent:true,
+   site:'https://bibn.unn.ru/reg/',
+   note:'Зарегистрироваться на bibn.unn.ru/reg/ и загрузить Согласие, подписанное родителями (ждать сообщения «Ждем вас на олимпиаде!»). Отбор в школе. Финал — в том же городе.',
+   stages:[{type:'Регистрация',name:'+ согласие от родителей',date:'2026-11-08',end:'2026-12-04',time:''},
+     {type:'Отборочный этап',name:'в школе',date:'2026-12-05',end:'',time:''},
+     {type:'Заключительный этап',name:'',date:'2027-02-28',end:'',time:''}]},
+  {id:'shvb_math',name:'Шаг в будущее (МГТУ им. Баумана)',subject:'Математика',level:'',
+   site:'https://olymp.bmstu.ru',
+   note:'Очно: АНОО «Школа №800», Нижний Новгород, бул. Южный, д. 23. Начало в 10:00 — прийти заранее, взять паспорт.',
+   stages:[{type:'Отборочный этап',name:'очно, Школа №800',date:'2026-11-16',end:'',time:'10:00'}]},
+  {id:'bibn_rus',name:'Будущие исследователи — будущее науки (Би-Бн)',subject:'Русский язык',level:'3',urgent:true,
+   site:'https://bibn.unn.ru/reg/',
+   note:'СРОЧНО зарегистрироваться на bibn.unn.ru/reg/ и загрузить Согласие, подписанное родителями (ждать «Ждем вас на олимпиаде!»). Отбор в воскресенье 29 ноября в 9:30 — по воскресеньям пишут в ННГУ. Финал 24 января, только очно.',
+   stages:[{type:'Регистрация',name:'+ согласие от родителей',date:'2026-11-09',end:'2026-11-27',time:''},
+     {type:'Отборочный этап',name:'очно',date:'2026-11-29',end:'',time:'09:30'},
+     {type:'Заключительный этап',name:'очно',date:'2027-01-24',end:'',time:''}]},
+  ...[['izum_math','Математика','Математика','3'],['izum_phys','Физика','Физика',''],['izum_eng','Инженерные науки','Физика','']]
+    .map(([id,prof,subj,lv])=>({id,name:'Изумруд (УрФУ) — '+prof,subject:subj,level:lv,site:'https://izumrud.urfu.ru',
+      note:'Отбор онлайн-тестом, сдать до 19 января. Финал очно 31 янв – 2 фев — площадку уточнить на сайте.',
+      stages:[{type:'Отборочный этап',name:'онлайн — сдать до',date:'2027-01-19',end:'',time:''},
+        {type:'Заключительный этап',name:'очно',date:'2027-01-31',end:'2027-02-02',time:''}]})),
+  ...[['rosatom_phys','Физика'],['rosatom_math','Математика']].map(([p,s])=>({id:p,name:'Росатом — '+s,subject:s,level:'1',urgent:true,
+    site:'https://olymp.mephi.ru/rosatom/about',
+    note:'Нужно зарегистрироваться. Онлайн-тур 17 ноя – 21 дек. Даёт БВИ в МФТИ (победителям) и МИФИ.',
+    stages:[{type:'Регистрация',name:'',date:'2026-11-09',end:'2026-11-16',time:''},
+      {type:'Отборочный этап',name:'интернет-тур',date:'2026-11-17',end:'2026-12-21',time:''},
+      {type:'Заключительный этап',name:'',date:'',end:'',time:''}]})),
+  {id:'ingeneer_phys',name:'Инженерная олимпиада школьников',subject:'Физика',level:'1',urgent:true,site:'https://www.ucheba.ru/for-abiturients/olympiads/5',
+   note:'Нужно зарегистрироваться. Онлайн-отбор 17 ноя – 21 дек. Финал в январе, есть площадка в Нижнем. Важна для МИФИ.',
+   stages:[{type:'Регистрация',name:'',date:'2026-11-09',end:'2026-11-16',time:''},
+     {type:'Отборочный этап',name:'онлайн',date:'2026-11-17',end:'2026-12-21',time:''},
+     {type:'Заключительный этап',name:'январь, Нижний Новгород',date:'',end:'',time:''}]},
+  {id:'internet_phys',name:'Интернет-олимпиада по физике (СПбГУ/ИТМО)',subject:'Физика',level:'2',site:'https://distolymp.spbu.ru/phys/olymp/barsic1197_distolymp.zip',
+   note:'Зарегистрирован. Оба тура под ОДНИМ логином, баллы суммируются. Задания на моделях — только в BARSIC (Windows 10/11): скачать архив 11.97 (ссылка «Сайт»; запасной — 11.91 или BarsicLaz_v4), распаковать, запустить barsic.exe и зайти на сайт олимпиады из его окна. Остальные задания — из любого браузера. Заранее прорешать тренировочные задания 10–11 кл. Финал 13 марта очно.',
+   stages:[{type:'Регистрация',name:'',date:'2026-11-09',end:'',time:'',done:true},
+     {type:'Отборочный этап',name:'1 тур онлайн',date:'2026-11-22',end:'2026-11-28',time:''},
+     {type:'Отборочный этап',name:'2 тур онлайн',date:'2027-01-17',end:'2027-01-23',time:''},
+     {type:'Заключительный этап',name:'очно',date:'2027-03-13',end:'',time:''}]},
+  {id:'kurchatov_phys',name:'Курчатов — физика',subject:'Физика',level:'2',site:'https://www.ucheba.ru/for-abiturients/olympiads/104',
+   note:'Онлайн-отбор примерно февраль–март 2027 — проверить даты ближе к зиме. Даёт БВИ в МФТИ (победителям).',
+   stages:[{type:'Отборочный этап',name:'онлайн, ~фев–март',date:'',end:'',time:''},
+     {type:'Заключительный этап',name:'',date:'',end:'',time:''}]},
+  {id:'pvg_phys',name:'Покори Воробьёвы горы! — физика',subject:'Физика',level:'1',site:'https://olimpiada.ru/activity/166',
+   note:'Регистрация с 1 декабря (уточнить в новостях). Отбор онлайн в личном кабинете. Финал очно в МГУ и регионах. Важна для МИФИ.',
+   stages:[{type:'Регистрация',name:'открывается',date:'2026-12-01',end:'',time:''},
+     {type:'Отборочный этап',name:'онлайн',date:'',end:'',time:''},
+     {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]},
+  {id:'spbu_phys',name:'Олимпиада СПбГУ — физика',subject:'Физика',level:'2',urgent:true,site:'https://olympiada.spbu.ru/',
+   note:'Регистрация и отбор до 1 декабря, отбор — в удобный день. Финал обычно февраль–март.',
+   stages:[{type:'Регистрация',name:'',date:'2026-10-10',end:'2026-12-01',time:''},
+     {type:'Отборочный этап',name:'в удобный день',date:'2026-10-20',end:'2026-12-01',time:''},
+     {type:'Заключительный этап',name:'~фев–март',date:'',end:'',time:''}]},
+  {id:'kfu_phys',name:'Олимпиада КФУ — физика',subject:'Физика',level:'2',urgent:true,site:'https://malun.kpfu.ru/mpo',
+   note:'Расписание 2026/27 не нашёл. В прошлом году отбор онлайн 26 окт – 23 ноя — проверить на сайте СРОЧНО, может уже идти. Финал очно (Казань).',
+   stages:[{type:'Отборочный этап',name:'онлайн — проверить даты',date:'',end:'',time:''},
+     {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]},
+  {id:'hope_phys',name:'Надежда энергетики — физика',subject:'Физика',level:'3',urgent:true,site:'https://www.energy-hope.ru/',
+   note:'Регистрация в кабинете olimpiada.ru, выбрать одну дату отбора: 21 или 29 ноября (дистанционно или на площадке). Писать можно только один раз. Финал в МЭИ.',
+   stages:[{type:'Регистрация',name:'+ выбрать дату',date:'2026-11-09',end:'2026-11-20',time:''},
+     {type:'Отборочный этап',name:'вариант 1',date:'2026-11-21',end:'',time:''},
+     {type:'Отборочный этап',name:'вариант 2',date:'2026-11-29',end:'',time:''},
+     {type:'Заключительный этап',name:'МЭИ',date:'',end:'',time:''}]},
+  {id:'mosh_phys',name:'МОШ — физика',subject:'Физика',level:'1',site:'https://olimpiada.ru/activity/130',
+   note:'Отбор пройден: 25 из 25. Финал очно (предварительно 28 фев) — уточнить дату и площадку. Даёт БВИ в МФТИ (победителям).',
+   stages:[{type:'Отборочный этап',name:'25/25',date:'2026-10-15',end:'2026-10-22',time:'',done:true},
+     {type:'Заключительный этап',name:'очно, предварительно',date:'2027-02-28',end:'',time:''}]},
+  {id:'sibir_phys',name:'Будущее Сибири — физика',subject:'Физика',level:'3',urgent:true,site:'https://olymp-sibir.nstu.ru/',
+   note:'Регистрация на сайте до 1 декабря. Отбор онлайн 6 декабря. Финал в феврале — формат уточнить (не из Сибири ли только очно).',
+   stages:[{type:'Регистрация',name:'',date:'2026-11-09',end:'2026-12-01',time:''},
+     {type:'Отборочный этап',name:'онлайн',date:'2026-12-06',end:'',time:''},
+     {type:'Заключительный этап',name:'февраль',date:'',end:'',time:''}]},
+  {id:'gazprom_phys',name:'Газпром — физика',subject:'Физика',level:'3',site:'https://www.ucheba.ru/for-abiturients/olympiads/113',
+   note:'Отбор онлайн до 15 января. Финал очно янв–март: Москва, СПб, Казань, Уфа и др. — ближайшие Москва/Казань.',
+   stages:[{type:'Отборочный этап',name:'онлайн — сдать до',date:'2026-11-01',end:'2027-01-15',time:''},
+     {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]},
+  {id:'belch_phys',name:'Бельчонок (СФУ) — физика',subject:'Физика',level:'3',site:'https://dovuz.sfu.ru/abiturientu-sfu/olimpiady/belchonok/2026-2027-uchebnyy-god/',
+   note:'Отбор дистанционно до 12 января. Финал 7 февраля — формат (очно/онлайн) уточнить в регламенте.',
+   stages:[{type:'Отборочный этап',name:'дистанционно — сдать до',date:'2026-10-02',end:'2027-01-12',time:''},
+     {type:'Заключительный этап',name:'',date:'2027-02-07',end:'',time:''}]},
+  {id:'itmo_phys',name:'Открытая олимпиада школьников (ИТМО) — физика',subject:'Физика',level:'3',site:'https://physchool.itmo.ru/ru/olympiads',
+   note:'Отбор онлайн декабрь 2026 – январь 2027, точные даты пока не нашёл.',
+   stages:[{type:'Отборочный этап',name:'онлайн, дек–янв',date:'',end:'',time:''},
+     {type:'Заключительный этап',name:'',date:'',end:'',time:''}]},
+  {id:'ommo_phys',name:'ОММО — физика',subject:'Физика',level:'3',site:'https://olimpiada.ru/activity/5897',
+   note:'Расписание обещают в январе 2027. Отбор онлайн, финал очно на площадках вузов.',
+   stages:[{type:'Отборочный этап',name:'онлайн',date:'',end:'',time:''},
+     {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]},
+  ...[['zvezda_tech','Техника и технологии','1','Выбрать одно из 13 направлений (приборостроение, машиностроение, мехатроника…). '],
+      ['zvezda_nat','Естественные науки (физика)','2','']].map(([id,prof,lv,extra])=>({id,name:'Звезда — '+prof,subject:'Физика',level:lv,urgent:true,
+    site:'https://zvportal.susu.ru',
+    note:extra+'Регистрация в личном кабинете zvportal.susu.ru. Интернет-тур отбора онлайн 9 ноя – 9 дек (очный вариант до 20 дек — площадку в Нижнем не нашёл). Даты финала пока не опубликованы.',
+    stages:[{type:'Регистрация',name:'личный кабинет',date:'2026-11-09',end:'2026-12-01',time:''},
+      {type:'Отборочный этап',name:'интернет-тур',date:'2026-11-09',end:'2026-12-09',time:''},
+      {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]})),
+  {id:'ranepa_eco',name:'Олимпиада РАНХиГС — экономика',subject:'Экономика',level:'3',urgent:true,site:'https://ucheba.ru/for-abiturients/olympiads/12',
+   note:'Регистрация И заочный отбор — до 18 ноября! Финал очно янв–фев, есть площадка в Нижнем Новгороде.',
+   stages:[{type:'Регистрация',name:'',date:'2026-09-16',end:'2026-11-18',time:''},
+     {type:'Отборочный этап',name:'заочно',date:'2026-10-20',end:'2026-11-18',time:''},
+     {type:'Заключительный этап',name:'очно, Нижний Новгород',date:'',end:'',time:''}]},
+  {id:'spbu_eco',name:'Олимпиада СПбГУ — экономика',subject:'Экономика',level:'2',urgent:true,site:'https://olympiada.spbu.ru/',
+   note:'Регистрация и отбор до 1 декабря (проверить дату именно для экономики).',
+   stages:[{type:'Регистрация',name:'',date:'2026-10-10',end:'2026-12-01',time:''},
+     {type:'Отборочный этап',name:'дистанционно',date:'2026-10-20',end:'2026-12-01',time:''},
+     {type:'Заключительный этап',name:'~фев–март',date:'',end:'',time:''}]},
+  {id:'sibiriada_eco',name:'Сибириада «Шаг в мечту» — экономика',subject:'Экономика',level:'2',site:'https://ucheba.ru/for-abiturients/olympiads/127',
+   note:'Регистрация ноябрь–декабрь. 1 тур заочно в декабре, 2 тур очно — есть Нижний Новгород. Финал в январе — тоже есть Нижний.',
+   stages:[{type:'Регистрация',name:'ноябрь–декабрь',date:'',end:'',time:''},
+     {type:'Отборочный этап',name:'1 тур заочно, декабрь',date:'',end:'',time:''},
+     {type:'Отборочный этап',name:'2 тур очно, Нижний',date:'',end:'',time:''},
+     {type:'Заключительный этап',name:'январь, Нижний',date:'',end:'',time:''}]},
+  {id:'plekh_eco',name:'Плехановская олимпиада — экономика',subject:'Экономика',level:'2',site:'https://www.ucheba.ru/for-abiturients/olympiads/42',
+   note:'Регистрация до 20 января, заочный отбор до 24 января. Финал очно в марте (Москва и регионы).',
+   stages:[{type:'Регистрация',name:'',date:'2026-10-22',end:'2027-01-20',time:''},
+     {type:'Отборочный этап',name:'заочно — сдать до',date:'2026-10-22',end:'2027-01-24',time:''},
+     {type:'Заключительный этап',name:'март',date:'',end:'',time:''}]},
+  {id:'gazprom_eco',name:'Газпром — экономика',subject:'Экономика',level:'',site:'https://www.ucheba.ru/for-abiturients/olympiads/113',
+   note:'Отбор онлайн до 15 января. Уровень по экономике не проверял.',
+   stages:[{type:'Отборочный этап',name:'онлайн — сдать до',date:'2026-11-01',end:'2027-01-15',time:''},
+     {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]},
+  {id:'innop_math',name:'Innopolis Open — математика',subject:'Математика',level:'2',urgent:true,site:'https://www.ucheba.ru/for-abiturients/olympiads/98/subject/1',
+   note:'Второй онлайн-отбор 28–29 ноября (первый был в октябре). Финал очно в Иннополисе 5–7 марта.',
+   stages:[{type:'Регистрация',name:'',date:'2026-11-09',end:'2026-11-27',time:''},
+     {type:'Отборочный этап',name:'2 онлайн-тур',date:'2026-11-28',end:'2026-11-29',time:''},
+     {type:'Заключительный этап',name:'Иннополис',date:'2027-03-05',end:'2027-03-07',time:''}]},
+  ...[['belch_math','Бельчонок (СФУ) — математика','2027-01-12']].map(([id,n,d])=>({id,name:n,subject:'Математика',level:'3',site:'',
+    note:'III уровень: задания проще, отбор онлайн. В МФТИ не засчитают, в других вузах — может дать 100 баллов.',
+    stages:[{type:'Отборочный этап',name:d?'онлайн — сдать до':'онлайн, дек–янв',date:d,end:'',time:''},
+      {type:'Заключительный этап',name:'',date:'',end:'',time:''}]})),
+  {id:'shvb_eng',name:'Шаг в будущее — инженерное дело',subject:'Физика',level:'2',urgent:true,site:'https://olimpiada.ru/activity/170',
+   note:'Олимпиада Бауманки — важна для их инженерных направлений. Отбор: 1) заочное академическое соревнование (онлайн, до ~7 дек), 2) предзащита научной работы (в МГТУ или на региональной площадке). Нужна своя научная/инженерная работа! Выбрать секцию ~до 1 дек — проверить даты 2026/27 на olymp.bmstu.ru.',
+   stages:[{type:'Регистрация',name:'+ выбрать секцию',date:'2026-11-09',end:'2026-12-01',time:''},
+     {type:'Отборочный этап',name:'академическое, онлайн',date:'2026-10-23',end:'2026-12-07',time:''},
+     {type:'Отборочный этап',name:'предзащита научной работы',date:'',end:'',time:''},
+     {type:'Заключительный этап',name:'',date:'',end:'',time:''}]},
+  {id:'nto',name:'НТО — 3 профиля',subject:'Физика',level:'2',urgent:true,site:'https://ntcontest.ru',
+   note:'Участвую по трём профилям, 1 этап пройден. 10 ноября — формирование команд и старт 2 (командного) этапа, 12:00 МСК. Командный этап до 7 дек (ручная проверка) / до 11 дек (автопроверка) — проверить по своим профилям. Уровень у профилей II–III.',
+   stages:[{type:'Отборочный этап',name:'1 этап',date:'2026-11-03',end:'',time:'',done:true},
+     {type:'Другое',name:'Формирование команд + старт 2 этапа',date:'2026-11-10',end:'',time:'12:00'},
+     {type:'Отборочный этап',name:'2 этап, командный',date:'2026-11-10',end:'2026-12-07',time:''},
+     {type:'Заключительный этап',name:'',date:'',end:'',time:''}]},
+  {id:'hse_nn_eco',name:'Олимпиада по экономике (НИУ ВШЭ — Нижний Новгород)',subject:'Экономика',level:'',
+   site:'',
+   note:'Очно: НИУ ВШЭ — Нижний Новгород, ул. Костина, д. 2. Начало в 9:30 — прийти заранее, взять паспорт.',
+   stages:[{type:'Другое',name:'очно, ул. Костина, 2',date:'2026-11-14',end:'',time:'09:30'}]},
+  {id:'vsosh_math',name:'ВсОШ — математика',subject:'Математика',level:'vsosh',site:'',
+   note:'Муниципальный этап. Время и место уточнить в школе.',
+   stages:[{type:'Другое',name:'Муниципальный этап',date:'2026-12-08',end:'',time:''},
+     {type:'Региональный этап',name:'',date:'',end:'',time:''}]},
+  {id:'vsosh_phys',name:'ВсОШ — физика',subject:'Физика',level:'vsosh',site:'https://olimpiada.ru/news/34550',
+   note:'Региональный этап, два дня: теория и эксперимент.',
+   stages:[{type:'Региональный этап',name:'',date:'2027-01-27',end:'2027-01-28',time:''},
+     {type:'Заключительный этап',name:'всерос',date:'',end:'',time:''}]},
+  {id:'vsosh_eco',name:'ВсОШ — экономика',subject:'Экономика',level:'vsosh',site:'https://olimpiada.ru/news/34550',
+   note:'Региональный этап.',
+   stages:[{type:'Региональный этап',name:'',date:'2027-01-26',end:'',time:''},
+     {type:'Заключительный этап',name:'всерос',date:'',end:'',time:''}]}
+];
+async function applySeed(){
+  let done=[];
+  try{done=(localStorage.getItem('seeded_ids')||'').split(',')}catch(e){}
+  if(useCS){try{done=done.concat(((await csCall('getItem','seeded_ids'))||'').split(','))}catch(e){}}
+  let legacy=false; try{legacy=localStorage.getItem(SEED_VER)==='1'}catch(e){}
+  if(legacy) done.push('phystech_phys','phystech_math','shvb_phys');
+  const todo=SEED.filter(s=>!done.includes(s.id));
+  if(!todo.length) return;
+  for(const s of todo) if(!olys.some(o=>o.id===s.id)) saveOly(JSON.parse(JSON.stringify(s)));
+  const all=[...new Set(done.concat(todo.map(s=>s.id)).filter(Boolean))].join(',');
+  try{localStorage.setItem('seeded_ids',all)}catch(e){}
+  if(useCS) csCall('setItem','seeded_ids',all).catch(()=>{});
+}
+
+async function load(){
+  olys = lsLoad(); render();
+  if(useCS){
+    try{
+      const keys=(await csCall('getKeys')).filter(k=>k.startsWith('o_'));
+      if(!keys.length){ for(const o of olys) await putCloud(o); }
+      else{
+        const items=await csCall('getItems',keys);
+        olys=keys.map(k=>{try{return JSON.parse(items[k])}catch(e){return null}}).filter(Boolean);
+        lsSave(); render();
+      }
+    }catch(e){console.warn(e);toast('Облако недоступно — данные на этом устройстве')}
+  }
+  await applySeed();
+  loadPinMeta();
+}
+
+/* ---------- логины/пароли: шифрование AES-GCM ключом из PIN ---------- */
+let cryptoKey=null, pinMeta=null;
+const TE=new TextEncoder(), TD=new TextDecoder();
+const b64=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
+const ub64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function deriveKey(pin,salt){
+  const base=await crypto.subtle.importKey('raw',TE.encode(pin),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function encStr(key,str){const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,TE.encode(str));return {iv:b64(iv),ct:b64(ct)}}
+async function decStr(key,o){return TD.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:ub64(o.iv)},key,ub64(o.ct)))}
+async function loadPinMeta(){
+  try{pinMeta=JSON.parse(localStorage.getItem('pin_meta'))}catch(e){}
+  if(useCS){try{const v=await csCall('getItem','pin_meta');if(v){pinMeta=JSON.parse(v);try{localStorage.setItem('pin_meta',v)}catch(e){}}}catch(e){}}
+}
+function savePinMeta(){const v=JSON.stringify(pinMeta);try{localStorage.setItem('pin_meta',v)}catch(e){}
+  if(useCS) csCall('setItem','pin_meta',v).catch(()=>{});}
+function askPin(title,hint){return new Promise(res=>{
+  const m=document.getElementById('pinModal'),inp=document.getElementById('pinInput');
+  document.getElementById('pinTitle').textContent=title;document.getElementById('pinHint').textContent=hint||'';
+  inp.value='';m.classList.add('open');setTimeout(()=>inp.focus(),50);
+  const done=v=>{m.classList.remove('open');res(v)};
+  document.getElementById('pinOk').onclick=()=>done(inp.value);
+  document.getElementById('pinCancel').onclick=()=>done(null);
+  inp.onkeydown=e=>{if(e.key==='Enter')done(inp.value)};
+})}
+async function unlock(){
+  if(cryptoKey) return true;
+  if(!window.crypto||!crypto.subtle){toast('Шифрование недоступно в этом окне');return false}
+  if(!pinMeta) await loadPinMeta();
+  if(!pinMeta){
+    const pin=await askPin('Придумай PIN','Им шифруются логины и пароли. Забудешь PIN — их не восстановить.');
+    if(pin==null) return false;
+    if(pin.length<4){toast('PIN — минимум 4 символа');return false}
+    const salt=crypto.getRandomValues(new Uint8Array(16));
+    cryptoKey=await deriveKey(pin,salt);
+    pinMeta={salt:b64(salt),check:await encStr(cryptoKey,'ok')};savePinMeta();return true;
+  }
+  const pin=await askPin('Введи PIN','Чтобы открыть логины и пароли');
+  if(pin==null) return false;
+  try{const k=await deriveKey(pin,ub64(pinMeta.salt));if(await decStr(k,pinMeta.check)!=='ok')throw 0;cryptoKey=k;return true}
+  catch(e){haptic('error');toast('Неверный PIN');return false}
+}
+
+/* импорт / экспорт */
+function normalize(o){
+  const id=String(o.id||uid()).replace(/[^A-Za-z0-9_-]/g,'_').slice(0,60);
+  return {id,name:String(o.name||'Без названия'),subject:SUBJECTS[o.subject]?o.subject:'Другое',
+    level:LEVELS[o.level]?String(o.level):'',urgent:!!o.urgent,site:o.site||'',note:o.note||'',
+    cred:o.cred&&o.cred.iv&&o.cred.ct?{iv:String(o.cred.iv),ct:String(o.cred.ct)}:null,
+    stages:(o.stages||[]).map(s=>({type:STAGE_TYPES.includes(s.type)?s.type:'Другое',name:s.name||'',
+      date:/^\d{4}-\d{2}-\d{2}$/.test(s.date||'')?s.date:'',end:/^\d{4}-\d{2}-\d{2}$/.test(s.end||'')?s.end:'',time:s.time||'',done:!!s.done}))};
+}
+function doImport(text){
+  let data; try{data=JSON.parse(text.trim())}catch(e){haptic('error');toast('Не получилось прочитать текст');return false}
+  const arr=Array.isArray(data)?data:[data]; let n=0;
+  for(const o of arr) if(o&&typeof o==='object'){saveOly(normalize(o));n++}
+  haptic('success'); toast('Добавлено/обновлено: '+n); return true;
+}
+async function doExport(){
+  const text=JSON.stringify(olys);
+  try{await navigator.clipboard.writeText(text);toast('Скопировано — можно вставить Claude')}
+  catch(e){document.getElementById('impText').value=text;document.getElementById('imp').classList.add('open');toast('Скопируй текст вручную')}
+}
+async function putCloud(o){
+  if(!useCS) return;
+  const v=JSON.stringify(o);
+  if(v.length>4096){toast('Слишком длинная заметка — в облако не влезло');return}
+  try{await csCall('setItem','o_'+o.id,v)}catch(e){toast('Не удалось сохранить в облако')}
+}
+function saveOly(o){
+  const i=olys.findIndex(x=>x.id===o.id);
+  if(i>=0)olys[i]=o;else olys.push(o);
+  lsSave(); putCloud(o); render();
+}
+function delOly(id){
+  olys=olys.filter(o=>o.id!==id); lsSave();
+  if(useCS) csCall('removeItem','o_'+id).catch(()=>{});
+  render();
+}
+
+/* ---------- data helpers ---------- */
+function events(){
+  const r=[];
+  for(const o of olys) for(const s of (o.stages||[])) if(s.date){
+    const end = s.end && s.end>=s.date ? s.end : s.date;
+    r.push({o,s,start:s.date,end});
+  }
+  return r.sort((a,b)=>a.start.localeCompare(b.start)||(a.s.time||'').localeCompare(b.s.time||''));
+}
+function stageLabel(s){return s.name?esc(s.type)+' · '+esc(s.name):esc(s.type)}
+function when(e){
+  const t=today();
+  if(e.s.done) return {txt:'✓ сделано',cls:'b-later'};
+  if(e.start<=t&&e.end>=t) return {txt:e.start===e.end?'сегодня':'идёт',cls:'b-now'};
+  if(e.end<t){const n=diffDays(e.end,t);return {txt:n+' '+plural(n,['день','дня','дней'])+' назад',cls:'b-later'}}
+  const n=diffDays(t,e.start);
+  if(n===1) return {txt:'завтра',cls:'b-soon'};
+  return {txt:'через '+n+' '+plural(n,['день','дня','дней']),cls:n<=7?'b-soon':'b-later'};
+}
+function eventRow(e){
+  const w=when(e), isReg=e.s.type==='Регистрация';
+  return `<button class="row" data-open="${e.o.id}">
+    <span class="bar" style="background:${color(e.o)}"></span>
+    <span class="grow"><div class="title">${e.o.urgent?'🔥 ':''}${esc(e.o.name)}</div>
+      <div class="sub ${isReg?'b-reg':''}">${stageLabel(e.s)}</div></span>
+    <span class="right">${fmtRange(e.start,e.end)}${e.s.time?' · '+esc(e.s.time):''}<br><span class="badge ${w.cls}">${w.txt}</span></span>
+  </button>`;
+}
+function emptyState(){
+  return `<div class="empty"><b>Пока пусто</b>Нажми «+», чтобы добавить первую олимпиаду и её этапы.</div>`;
+}
+
+/* ---------- views ---------- */
+function renderUp(){
+  if(!olys.length) return emptyState();
+  const t=today(), ev=events();
+  const up=ev.filter(e=>e.end>=t&&!e.s.done), past=ev.filter(e=>e.end<t||e.s.done).reverse();
+  const groups=[['Сейчас',[]],['Завтра',[]],['Ближайшая неделя',[]],['Ближайший месяц',[]],['Позже',[]]];
+  for(const e of up){
+    const n=e.start<=t?0:diffDays(t,e.start);
+    groups[n===0?0:n===1?1:n<=7?2:n<=31?3:4][1].push(e);
+  }
+  let h='';
+  const dl=o=>{const s=(o.stages||[]).filter(s=>s.date&&!s.done&&(s.end||s.date)>=t).sort((a,b)=>(a.end||a.date).localeCompare(b.end||b.date))[0];return s?(s.end||s.date):'9999'};
+  const urg=olys.filter(o=>o.urgent).sort((a,b)=>dl(a).localeCompare(dl(b)));
+  if(urg.length) h+=`<div class="group" style="color:#ef4444">🔥 Срочно</div><div class="list">${urg.map(o=>{
+    const s=(o.stages||[]).filter(s=>s.date&&!s.done&&(s.end||s.date)>=t).sort((a,b)=>a.date.localeCompare(b.date))[0];
+    const u=(o.stages||[]).find(s=>!s.date&&!s.done);
+    const right=s?(s.end&&s.end!==s.date&&s.date<=t?'до '+fmt(s.end):fmtRange(s.date,s.end)):'дата уточняется';
+    return `<button class="row" data-open="${o.id}"><span class="bar" style="background:#ef4444"></span>
+      <span class="grow"><div class="title">${esc(o.name)}</div><div class="sub">${s?stageLabel(s):u?stageLabel(u):''}</div></span>
+      <span class="right">${right}</span></button>`}).join('')}</div>`;
+  for(const [name,list] of groups) if(list.length) h+=`<div class="group">${name}</div><div class="list">${list.map(eventRow).join('')}</div>`;
+  const tbd=[];
+  for(const o of olys) for(const s of (o.stages||[])) if(!s.date&&!s.done) tbd.push({o,s});
+  if(tbd.length) h+=`<div class="group">Дата уточняется</div><div class="list">${tbd.map(e=>`<button class="row" data-open="${e.o.id}">
+    <span class="bar" style="background:${color(e.o)}"></span>
+    <span class="grow"><div class="title">${esc(e.o.name)}</div><div class="sub">${stageLabel(e.s)}</div></span>
+    <span class="right"><span class="badge b-later">уточняется</span></span></button>`).join('')}</div>`;
+  if(!up.length&&!tbd.length) h+=`<div class="empty"><b>Ближайших этапов нет</b>Добавь даты к олимпиадам.</div>`;
+  if(past.length){
+    h+=`<button class="link" id="togglePast">${state.showPast?'Скрыть прошедшие':'Прошедшие и сделанные ('+past.length+')'}</button>`;
+    if(state.showPast) h+=`<div class="list">${past.map(eventRow).join('')}</div>`;
+  }
+  return h;
+}
+
+function renderCal(){
+  const {y,m}=state, first=new Date(y,m,1), offset=(first.getDay()+6)%7, days=new Date(y,m+1,0).getDate();
+  const ev=events(), t=today();
+  let cells='';
+  for(let i=0;i<offset;i++) cells+=`<div class="day out"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=ymd(new Date(y,m,d));
+    const here=ev.filter(e=>e.start<=ds&&e.end>=ds);
+    const cols=[...new Set(here.map(e=>color(e.o)))].slice(0,3);
+    cells+=`<button class="day ${ds===t?'today':''} ${ds===state.sel?'sel':''}" data-day="${ds}">${d}
+      <span class="dots">${cols.map(c=>`<span class="dot" style="background:${c}"></span>`).join('')}</span></button>`;
+  }
+  const sel=ev.filter(e=>e.start<=state.sel&&e.end>=state.sel);
+  return `<div class="cal">
+    <div class="cal-h"><button class="nav" data-nav="-1">‹</button><b>${MON_N[m]} ${y}</b><button class="nav" data-nav="1">›</button></div>
+    <div class="grid">${WD.map(w=>`<div class="wd">${w}</div>`).join('')}${cells}</div>
+  </div>
+  <div class="group">${fmt(state.sel)}</div>
+  ${sel.length?`<div class="list">${sel.map(eventRow).join('')}</div>`:`<div class="empty" style="padding:20px">В этот день ничего нет</div>`}`;
+}
+
+function renderAll(){
+  if(!olys.length) return emptyState()+`<div class="two"><button class="btn2" id="impBtn">Импорт</button><button class="btn2" id="expBtn">Экспорт</button></div>`;
+  const t=today();
+  const next=o=>{const s=(o.stages||[]).filter(s=>s.date&&!s.done&&(s.end||s.date)>=t).sort((a,b)=>a.date.localeCompare(b.date))[0];return s};
+  const sorted=[...olys].sort((a,b)=>{if(!!a.urgent!==!!b.urgent)return a.urgent?-1:1;const na=next(a),nb=next(b);
+    if(na&&nb)return na.date.localeCompare(nb.date); if(na)return -1; if(nb)return 1; return a.name.localeCompare(b.name)});
+  return sorted.map(o=>{
+    const n=next(o), c=color(o), u=(o.stages||[]).find(s=>!s.date&&!s.done);
+    return `<button class="card" data-open="${o.id}">
+      <div class="title">${o.urgent?'🔥 ':''}${esc(o.name)}${o.cred?' 🔑':''}</div>
+      <div class="sub">${n?'Дальше: '+stageLabel(n)+', '+fmt(n.date):u?'Дальше: '+stageLabel(u)+', дата уточняется':'Нет предстоящих этапов'}</div>
+      <div class="chips"><span class="chip" style="background:color-mix(in srgb,${c} 18%,transparent);color:${c}">${esc(o.subject||'Другое')}</span>
+      ${o.level?`<span class="chip" style="background:color-mix(in srgb,var(--hint) 18%,transparent);color:var(--hint)">${esc(LEVELS[o.level]||'')}</span>`:''}</div>
+    </button>`;
+  }).join('') + `<div class="two" style="margin-top:14px"><button class="btn2" id="impBtn">Импорт</button><button class="btn2" id="expBtn">Экспорт</button></div>`;
+}
+
+function render(){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===state.tab));
+  const main=document.getElementById('main');
+  main.innerHTML = state.tab==='up'?renderUp():state.tab==='cal'?renderCal():renderAll();
+}
+
+/* ---------- editor ---------- */
+function openEditor(o){
+  draft = o ? JSON.parse(JSON.stringify(o)) : {id:uid(),name:'',subject:'Физика',level:'',site:'',note:'',stages:[{type:'Регистрация',name:'',date:'',end:'',time:''}]};
+  draft._new = !o;
+  renderEditor();
+  document.getElementById('editor').classList.add('open');
+  document.getElementById('editor').scrollTop=0;
+  if(tg&&tg.BackButton){tg.BackButton.show()}
+}
+function closeEditor(){
+  draft=null;
+  document.getElementById('editor').classList.remove('open');
+  if(tg&&tg.BackButton) tg.BackButton.hide();
+}
+function opt(list,val){return list.map(([v,l])=>`<option value="${esc(v)}" ${v===val?'selected':''}>${esc(l)}</option>`).join('')}
+function renderEditor(){
+  const d=draft;
+  const subj=Object.keys(SUBJECTS).map(s=>[s,s]);
+  const lv=[['','— не указан —'],...Object.entries(LEVELS)];
+  const stages=d.stages.map((s,i)=>`<div class="stage">
+      <div class="st-h"><select data-i="${i}" data-f="type">${opt(STAGE_TYPES.map(t=>[t,t]),s.type)}</select>
+        <label style="display:flex;align-items:center;gap:6px;flex:none;font-size:14px;color:var(--hint)">
+          <input type="checkbox" data-i="${i}" data-f="done" ${s.done?'checked':''} style="width:20px;height:20px;accent-color:#22c55e">Сделано</label>
+        <button class="del" data-delstage="${i}" aria-label="Удалить этап">✕</button></div>
+      <div class="field"><input data-i="${i}" data-f="name" placeholder="Уточнение (необяз.), напр. «онлайн-тур»" value="${esc(s.name)}"></div>
+      <div class="two"><div class="field"><label>Дата (пусто = уточняется)</label><input type="date" data-i="${i}" data-f="date" value="${esc(s.date)}"></div>
+        <div class="field"><label>До (если несколько дней)</label><input type="date" data-i="${i}" data-f="end" value="${esc(s.end)}"></div></div>
+      <div class="field" style="max-width:50%"><label>Время</label><input type="time" data-i="${i}" data-f="time" value="${esc(s.time)}"></div>
+    </div>`).join('');
+  document.getElementById('editor').innerHTML=`
+    <div class="ed-h"><button class="link" id="cancelEd" style="padding:4px">Отмена</button>
+      <b>${d._new?'Новая олимпиада':'Олимпиада'}</b><span style="width:56px"></span></div>
+    <div class="box">
+      <div class="field"><label>Название</label><input data-f="name" placeholder="Например, Физтех" value="${esc(d.name)}"></div>
+      <div class="two">
+        <div class="field"><label>Предмет</label><select data-f="subject">${opt(subj,d.subject)}</select></div>
+        <div class="field"><label>Уровень РСОШ</label><select data-f="level">${opt(lv,d.level)}</select></div>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;margin:2px 4px 12px;font-weight:600">
+        <input type="checkbox" data-f="urgent" ${d.urgent?'checked':''} style="width:20px;height:20px;accent-color:#ef4444"> 🔥 Срочно</label>
+      <div class="field"><label>Сайт</label><input data-f="site" inputmode="url" placeholder="https://…" value="${esc(d.site)}"></div>
+      ${d.site?`<button class="link" id="openSite" style="padding:0 4px 10px">Открыть сайт ↗</button>`:''}
+      <div class="field"><label>Заметка</label><textarea data-f="note" rows="2" placeholder="Логин, аудитория, что взять…">${esc(d.note)}</textarea></div>
+    </div>
+    <div class="group" style="margin-top:4px">Личный кабинет</div>
+    <div class="box">${d._credOpen?`
+      <div class="field"><label>Логин / почта</label><div class="cred-row">
+        <input data-f="_login" autocomplete="off" value="${esc(d._login)}"><button class="ibtn" data-copy="_login" aria-label="Скопировать логин">⧉</button></div></div>
+      <div class="field"><label>Пароль</label><div class="cred-row">
+        <input data-f="_pass" type="${d._show?'text':'password'}" autocomplete="off" value="${esc(d._pass)}">
+        <button class="ibtn" id="credShow" aria-label="Показать пароль">${d._show?'🙈':'👁'}</button>
+        <button class="ibtn" data-copy="_pass" aria-label="Скопировать пароль">⧉</button></div></div>
+      <div class="sub">Хранится зашифрованным. ${d.cred?'<button class="del" id="credDel" style="padding:4px 0">Удалить данные ЛК</button>':''}</div>`
+      : d.cred?`<button class="btn2" id="credOpen" style="background:var(--bg2)">🔒 Открыть логин и пароль</button>`
+      :`<button class="btn2" id="credOpen" style="background:var(--bg2)">+ Добавить логин и пароль</button>`}
+    </div>
+    <div class="group" style="margin-top:4px">Этапы и даты</div>
+    <div class="box">${stages||'<div class="sub">Этапов пока нет</div>'}</div>
+    <button class="btn2" id="addStage">+ Добавить этап</button>
+    ${d._new?'':'<button class="btn2" id="delOly" style="color:var(--danger);margin-top:10px">Удалить олимпиаду</button>'}`;
+}
+
+document.getElementById('editor').addEventListener('input',e=>{
+  const el=e.target, f=el.dataset.f; if(!f||!draft) return;
+  const v=el.type==='checkbox'?el.checked:el.value;
+  if(el.dataset.i!==undefined) draft.stages[+el.dataset.i][f]=v; else draft[f]=v;
+});
+document.getElementById('editor').addEventListener('click',async e=>{
+  const t=e.target.closest('button'); if(!t) return;
+  if(t.id==='cancelEd') return closeEditor();
+  if(t.id==='credOpen'){
+    if(!(await unlock())) return;
+    if(draft.cred){try{const j=JSON.parse(await decStr(cryptoKey,draft.cred));draft._login=j.l||'';draft._pass=j.p||''}
+      catch(e){toast('Не удалось расшифровать — другой PIN?');return}}
+    else{draft._login='';draft._pass=''}
+    draft._credOpen=true;renderEditor();return;
+  }
+  if(t.id==='credShow'){draft._show=!draft._show;renderEditor();return}
+  if(t.dataset.copy){const v=draft[t.dataset.copy]||'';
+    try{await navigator.clipboard.writeText(v);haptic('success');toast('Скопировано')}catch(e){toast('Не удалось скопировать')}return}
+  if(t.id==='credDel'){if(await confirmAsk('Удалить логин и пароль этой олимпиады?')){draft.cred=null;draft._login=draft._pass='';draft._credOpen=false;renderEditor()}return}
+  if(t.id==='addStage'){
+    const last=draft.stages[draft.stages.length-1];
+    const nextType=last?STAGE_TYPES[Math.min(STAGE_TYPES.indexOf(last.type)+1,STAGE_TYPES.length-1)]:'Регистрация';
+    draft.stages.push({type:nextType,name:'',date:'',end:'',time:''}); renderEditor(); return;
+  }
+  if(t.dataset.delstage!==undefined){draft.stages.splice(+t.dataset.delstage,1);renderEditor();return}
+  if(t.id==='openSite'){let u=draft.site.trim();if(!/^https?:\/\//.test(u))u='https://'+u;
+    if(inTG)tg.openLink(u);else window.open(u,'_blank');return}
+  if(t.id==='delOly'){
+    if(await confirmAsk('Удалить «'+(draft.name||'олимпиаду')+'»?')){delOly(draft.id);closeEditor();haptic('success');toast('Удалено')}
+  }
+});
+document.getElementById('saveBtn').addEventListener('click',async()=>{
+  if(!draft) return;
+  draft.name=draft.name.trim();
+  if(!draft.name){haptic('error');toast('Напиши название олимпиады');return}
+  if(draft._credOpen&&cryptoKey){
+    const l=(draft._login||'').trim(),p=draft._pass||'';
+    draft.cred=(l||p)?await encStr(cryptoKey,JSON.stringify({l,p})):null;
+  }
+  const o={...draft}; ['_new','_login','_pass','_credOpen','_show'].forEach(k=>delete o[k]);
+  saveOly(o); closeEditor(); haptic('success'); toast('Сохранено');
+});
+if(tg&&tg.BackButton) tg.BackButton.onClick(closeEditor);
+
+/* ---------- main events ---------- */
+document.querySelector('.tabs').addEventListener('click',e=>{
+  const b=e.target.closest('.tab'); if(!b) return; state.tab=b.dataset.tab; render();
+});
+document.getElementById('fab').addEventListener('click',()=>openEditor(null));
+document.getElementById('main').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.open){openEditor(olys.find(o=>o.id===b.dataset.open));return}
+  if(b.id==='togglePast'){state.showPast=!state.showPast;render();return}
+  if(b.id==='impBtn'){document.getElementById('impText').value='';document.getElementById('imp').classList.add('open');return}
+  if(b.id==='expBtn'){doExport();return}
+  if(b.dataset.day){state.sel=b.dataset.day;render();return}
+  if(b.dataset.nav){
+    state.m+=+b.dataset.nav;
+    if(state.m<0){state.m=11;state.y--} if(state.m>11){state.m=0;state.y++}
+    const t=today(), first=ymd(new Date(state.y,state.m,1));
+    state.sel = t.slice(0,7)===first.slice(0,7) ? t : first;
+    render();
+  }
+});
+
+document.getElementById('impCancel').addEventListener('click',()=>document.getElementById('imp').classList.remove('open'));
+document.getElementById('impDo').addEventListener('click',()=>{
+  if(doImport(document.getElementById('impText').value)) document.getElementById('imp').classList.remove('open');
+});
+
+load();
+</script>
+</body>
+</html>
