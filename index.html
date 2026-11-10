@@ -34,7 +34,7 @@ input,select,textarea{font:inherit;color:var(--text);background:var(--bg2);borde
   border-radius:10px;padding:10px 12px;width:100%;outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--btn)}
 .tabs{position:sticky;top:0;z-index:5;display:flex;gap:4px;padding:10px 12px;background:var(--bg2)}
-.tab{flex:1;padding:8px 0;border-radius:10px;color:var(--hint);font-weight:600;font-size:14px}
+.tab{flex:1;padding:8px 0;border-radius:10px;color:var(--hint);font-weight:600;font-size:13px;white-space:nowrap}
 .tab.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 main{padding:0 12px 96px}
 .group{margin:14px 4px 6px;font-size:13px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.03em}
@@ -108,6 +108,7 @@ main{padding:0 12px 96px}
 <div class="tabs">
   <button class="tab on" data-tab="up">Ближайшие</button>
   <button class="tab" data-tab="cal">Календарь</button>
+  <button class="tab" data-tab="prep">Подготовка</button>
   <button class="tab" data-tab="all">Все</button>
 </div>
 <main id="main"></main>
@@ -138,6 +139,10 @@ const SUBJECTS = {
   'Информатика':'#a855f7','Русский язык':'#f59e0b','Другое':'#94a3b8'
 };
 const STAGE_TYPES = ['Регистрация','Отборочный этап','Региональный этап','Заключительный этап','Результаты','Другое'];
+const PREP_TYPES = ['Пробный тур','Тест','Занятие','Коллоквиум','Игра','Другое'];
+const isPrep=o=>o.kind==='prep';
+const OLY=()=>olys.filter(o=>!isPrep(o));
+const PREP=()=>olys.filter(isPrep);
 const LEVELS = {'1':'I уровень','2':'II уровень','3':'III уровень','vsosh':'ВсОШ','0':'Вне перечня'};
 const MON_G = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const MON_N = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
@@ -368,6 +373,13 @@ const SEED=[
    stages:[{type:'Регистрация',name:'на olymp.itmo.ru',date:'',end:'',time:''},
      {type:'Отборочный этап',name:'онлайн, ~декабрь',date:'',end:'',time:''},
      {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]},
+  {id:'prep_eco_re',kind:'prep',name:'Подготовка к РЭ — экономика',subject:'Экономика',level:'',site:'',
+   note:'Пробные туры в формате РЭ 10:00–13:00 МСК. Еженедельные тесты, коллоквиум 27 дек, экономические игры 28–29 дек.',
+   stages:[{type:'Пробный тур',name:'формат РЭ, до 13:00',date:'2026-11-15',end:'',time:'10:00'},{type:'Пробный тур',name:'формат РЭ, до 13:00',date:'2026-11-29',end:'',time:'10:00'},{type:'Пробный тур',name:'формат РЭ, до 13:00',date:'2026-12-13',end:'',time:'10:00'},{type:'Пробный тур',name:'формат РЭ, до 13:00',date:'2026-12-26',end:'',time:'10:00'},{type:'Пробный тур',name:'формат РЭ, до 13:00',date:'2027-01-23',end:'',time:'10:00'},{type:'Тест',name:'еженедельный',date:'2026-11-10',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-11-12',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-11-17',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-11-19',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-11-24',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-11-26',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-12-01',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-12-03',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-12-08',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-12-10',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-12-15',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-12-17',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-12-22',end:'',time:''},{type:'Тест',name:'еженедельный',date:'2026-12-24',end:'',time:''},{type:'Коллоквиум',name:'',date:'2026-12-27',end:'',time:''},{type:'Игра',name:'экономические игры',date:'2026-12-28',end:'2026-12-29',time:''}]},
+  {id:'prep_rus_ege',kind:'prep',name:'ЕГЭ — русский язык',subject:'Русский язык',level:'',site:'',note:'Каждый понедельник в 17:30.',
+   stages:[{type:'Занятие',name:'',date:'2026-11-16',end:'2027-05-31',time:'17:30',rep:'w'}]},
+  {id:'prep_olphys',kind:'prep',name:'Олфизика',subject:'Физика',level:'',site:'',note:'Каждое воскресенье 14:30 — до 18:00–18:30.',
+   stages:[{type:'Занятие',name:'до 18:00–18:30',date:'2026-11-15',end:'2027-05-31',time:'14:30',rep:'w'}]},
   {id:'hse_nn_eco',name:'Олимпиада по экономике (НИУ ВШЭ — Нижний Новгород)',subject:'Экономика',level:'',
    site:'',
    note:'Очно: НИУ ВШЭ — Нижний Новгород, ул. Костина, д. 2. Начало в 9:30 — прийти заранее, взять паспорт.',
@@ -484,8 +496,9 @@ function normalize(o){
   return {id,name:String(o.name||'Без названия'),subject:SUBJECTS[o.subject]?o.subject:'Другое',
     level:LEVELS[o.level]?String(o.level):'',urgent:!!o.urgent,site:o.site||'',note:o.note||'',
     cred:o.cred&&o.cred.iv&&o.cred.ct?{iv:String(o.cred.iv),ct:String(o.cred.ct)}:null,
-    stages:(o.stages||[]).map(s=>({type:STAGE_TYPES.includes(s.type)?s.type:'Другое',name:s.name||'',
-      date:/^\d{4}-\d{2}-\d{2}$/.test(s.date||'')?s.date:'',end:/^\d{4}-\d{2}-\d{2}$/.test(s.end||'')?s.end:'',time:s.time||'',done:!!s.done,...(s.u?{u:true}:{})}))};
+    ...(o.kind==='prep'?{kind:'prep'}:{}),
+    stages:(o.stages||[]).map(s=>({type:(o.kind==='prep'?PREP_TYPES:STAGE_TYPES).includes(s.type)?s.type:'Другое',name:s.name||'',
+      date:/^\d{4}-\d{2}-\d{2}$/.test(s.date||'')?s.date:'',end:/^\d{4}-\d{2}-\d{2}$/.test(s.end||'')?s.end:'',time:s.time||'',done:!!s.done,...(s.u?{u:true}:{}),...(s.rep==='w'?{rep:'w'}:{})}))};
 }
 function doImport(text){
   let data; try{data=JSON.parse(text.trim())}catch(e){haptic('error');toast('Не получилось прочитать текст');return false}
@@ -516,9 +529,13 @@ function delOly(id){
 }
 
 /* ---------- data helpers ---------- */
-function events(){
+function addDays(s,n){const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)}
+function events(list=olys){
   const r=[];
-  for(const o of olys) for(const s of (o.stages||[])) if(s.date){
+  for(const o of list) for(const s of (o.stages||[])) if(s.date&&s.rep==='w'){
+    const until=s.end&&s.end>=s.date?s.end:addDays(s.date,182);
+    for(let d=s.date;d<=until;d=addDays(d,7)) r.push({o,s,start:d,end:d,occ:true});
+  } else if(s.date){
     const end = s.end && s.end>=s.date ? s.end : s.date;
     r.push({o,s,start:s.date,end});
   }
@@ -527,7 +544,7 @@ function events(){
 function stageLabel(s){return s.name?esc(s.type)+' · '+esc(s.name):esc(s.type)}
 function when(e){
   const t=today();
-  if(e.s.done) return {txt:'✓ сделано',cls:'b-later'};
+  if(e.s.done&&!e.occ) return {txt:'✓ сделано',cls:'b-later'};
   if(e.start<=t&&e.end>=t) return {txt:e.start===e.end?'сегодня':'идёт',cls:'b-now'};
   if(e.end<t){const n=diffDays(e.end,t);return {txt:n+' '+plural(n,['день','дня','дней'])+' назад',cls:'b-later'}}
   const n=diffDays(t,e.start);
@@ -539,7 +556,7 @@ function eventRow(e){
   return `<button class="row" data-open="${e.o.id}">
     <span class="bar" style="background:${color(e.o)}"></span>
     <span class="grow"><div class="title">${e.o.urgent?'🔥 ':''}${esc(e.o.name)}</div>
-      <div class="sub ${isReg?'b-reg':''}">${stageLabel(e.s)}</div></span>
+      <div class="sub ${isReg?'b-reg':''}">${isPrep(e.o)?'📚 ':''}${stageLabel(e.s)}</div></span>
     <span class="right">${fmtRange(e.start,e.end)}${e.s.time?' · '+esc(e.s.time):''}<br><span class="badge ${w.cls}">${w.txt}</span></span>
   </button>`;
 }
@@ -548,10 +565,17 @@ function emptyState(){
 }
 
 /* ---------- views ---------- */
+function groupRows(up,t){
+  const groups=[['Сейчас',[]],['Завтра',[]],['Ближайшая неделя',[]],['Ближайший месяц',[]],['Позже',[]]];
+  for(const e of up){const n=e.start<=t?0:diffDays(t,e.start);groups[n===0?0:n===1?1:n<=7?2:n<=31?3:4][1].push(e)}
+  let h='';for(const [name,list] of groups) if(list.length) h+=`<div class="group">${name}</div><div class="list">${list.map(eventRow).join('')}</div>`;
+  return h;
+}
 function renderUp(){
-  if(!olys.length) return emptyState();
-  const t=today(), ev=events();
-  const up=ev.filter(e=>e.end>=t&&!e.s.done), past=ev.filter(e=>e.end<t||e.s.done).reverse();
+  const O=OLY();
+  if(!O.length) return emptyState();
+  const t=today(), ev=events(O), lim=addDays(t,14);
+  const up=ev.filter(e=>e.end>=t&&!e.s.done&&(!e.occ||e.start<=lim)), past=ev.filter(e=>!e.occ&&(e.end<t||e.s.done)).reverse();
   const groups=[['Сейчас',[]],['Завтра',[]],['Ближайшая неделя',[]],['Ближайший месяц',[]],['Позже',[]]];
   for(const e of up){
     const n=e.start<=t?0:diffDays(t,e.start);
@@ -559,7 +583,7 @@ function renderUp(){
   }
   let h='';
   const dl=o=>{const s=(o.stages||[]).filter(s=>s.date&&!s.done&&(s.end||s.date)>=t).sort((a,b)=>(a.end||a.date).localeCompare(b.end||b.date))[0];return s?(s.end||s.date):'9999'};
-  const urg=olys.filter(o=>o.urgent).sort((a,b)=>dl(a).localeCompare(dl(b)));
+  const urg=O.filter(o=>o.urgent).sort((a,b)=>dl(a).localeCompare(dl(b)));
   if(urg.length) h+=`<div class="group" style="color:#ef4444">🔥 Срочно</div><div class="list">${urg.map(o=>{
     const s=(o.stages||[]).filter(s=>s.date&&!s.done&&(s.end||s.date)>=t).sort((a,b)=>a.date.localeCompare(b.date))[0];
     const u=(o.stages||[]).find(s=>!s.date&&!s.done);
@@ -569,7 +593,7 @@ function renderUp(){
       <span class="right">${right}</span></button>`}).join('')}</div>`;
   for(const [name,list] of groups) if(list.length) h+=`<div class="group">${name}</div><div class="list">${list.map(eventRow).join('')}</div>`;
   const tbd=[];
-  for(const o of olys) for(const s of (o.stages||[])) if(!s.date&&!s.done) tbd.push({o,s});
+  for(const o of O) for(const s of (o.stages||[])) if(!s.date&&!s.done) tbd.push({o,s});
   if(tbd.length) h+=`<div class="group">Дата уточняется</div><div class="list">${tbd.map(e=>`<button class="row" data-open="${e.o.id}">
     <span class="bar" style="background:${color(e.o)}"></span>
     <span class="grow"><div class="title">${esc(e.o.name)}</div><div class="sub">${stageLabel(e.s)}</div></span>
@@ -604,10 +628,11 @@ function renderCal(){
 }
 
 function renderAll(){
-  if(!olys.length) return emptyState()+`<div class="two"><button class="btn2" id="impBtn">Импорт</button><button class="btn2" id="expBtn">Экспорт</button></div>`;
+  const O=OLY();
+  if(!O.length) return emptyState()+`<div class="two"><button class="btn2" id="impBtn">Импорт</button><button class="btn2" id="expBtn">Экспорт</button></div>`;
   const t=today();
   const next=o=>{const s=(o.stages||[]).filter(s=>s.date&&!s.done&&(s.end||s.date)>=t).sort((a,b)=>a.date.localeCompare(b.date))[0];return s};
-  const sorted=[...olys].sort((a,b)=>{if(!!a.urgent!==!!b.urgent)return a.urgent?-1:1;const na=next(a),nb=next(b);
+  const sorted=[...O].sort((a,b)=>{if(!!a.urgent!==!!b.urgent)return a.urgent?-1:1;const na=next(a),nb=next(b);
     if(na&&nb)return na.date.localeCompare(nb.date); if(na)return -1; if(nb)return 1; return a.name.localeCompare(b.name)});
   return sorted.map(o=>{
     const n=next(o), c=color(o), u=(o.stages||[]).find(s=>!s.date&&!s.done);
@@ -620,15 +645,37 @@ function renderAll(){
   }).join('') + `<div class="two" style="margin-top:14px"><button class="btn2" id="impBtn">Импорт</button><button class="btn2" id="expBtn">Экспорт</button></div>`;
 }
 
+function renderPrep(){
+  const P=PREP();
+  if(!P.length) return `<div class="empty"><b>Подготовки пока нет</b>Нажми «+», чтобы добавить курс, сборы или занятия.</div>`;
+  const t=today(), ev=events(P), lim=addDays(t,14);
+  const up=ev.filter(e=>e.end>=t&&!e.s.done&&(!e.occ||e.start<=lim)), past=ev.filter(e=>!e.occ&&(e.end<t||e.s.done)).reverse();
+  let h=groupRows(up,t);
+  if(!up.length) h+=`<div class="empty" style="padding:24px"><b>Ближайших занятий нет</b></div>`;
+  h+=`<div class="group">Курсы и программы</div>`+P.map(o=>{
+    const c=color(o), left=ev.filter(e=>e.o===o&&!e.occ&&e.end>=t&&!e.s.done).length;
+    const reps=(o.stages||[]).filter(s=>s.rep==='w'&&s.date).map(s=>'каждый '+WD[(parse(s.date).getDay()+6)%7]+(s.time?' в '+esc(s.time):''));
+    return `<button class="card" data-open="${o.id}"><div class="title">${esc(o.name)}${o.cred?' 🔑':''}</div>
+      <div class="sub">${reps.length?reps.join(', '):'Впереди: '+left+' '+plural(left,['событие','события','событий'])}</div>
+      <div class="chips"><span class="chip" style="background:color-mix(in srgb,${c} 18%,transparent);color:${c}">${esc(o.subject||'Другое')}</span></div></button>`}).join('');
+  if(past.length){
+    h+=`<button class="link" id="togglePastPrep">${state.showPastPrep?'Скрыть прошедшие':'Прошедшие и сделанные ('+past.length+')'}</button>`;
+    if(state.showPastPrep) h+=`<div class="list">${past.map(eventRow).join('')}</div>`;
+  }
+  return h;
+}
+
 function render(){
   document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===state.tab));
   const main=document.getElementById('main');
-  main.innerHTML = state.tab==='up'?renderUp():state.tab==='cal'?renderCal():renderAll();
+  main.innerHTML = state.tab==='up'?renderUp():state.tab==='cal'?renderCal():state.tab==='prep'?renderPrep():renderAll();
 }
 
 /* ---------- editor ---------- */
-function openEditor(o){
-  draft = o ? JSON.parse(JSON.stringify(o)) : {id:uid(),name:'',subject:'Физика',level:'',site:'',note:'',stages:[{type:'Регистрация',name:'',date:'',end:'',time:''}]};
+function openEditor(o,prep){
+  draft = o ? JSON.parse(JSON.stringify(o)) : prep
+    ? {id:uid(),kind:'prep',name:'',subject:'Физика',level:'',site:'',note:'',stages:[{type:'Занятие',name:'',date:'',end:'',time:'',u:true}]}
+    : {id:uid(),name:'',subject:'Физика',level:'',site:'',note:'',stages:[{type:'Регистрация',name:'',date:'',end:'',time:'',u:true}]};
   draft._new = !o;
   renderEditor();
   document.getElementById('editor').classList.add('open');
@@ -645,27 +692,29 @@ function renderEditor(){
   const d=draft;
   const subj=Object.keys(SUBJECTS).map(s=>[s,s]);
   const lv=[['','— не указан —'],...Object.entries(LEVELS)];
+  const P=isPrep(d), TYPES=P?PREP_TYPES:STAGE_TYPES;
   const stages=d.stages.map((s,i)=>`<div class="stage">
-      <div class="st-h"><select data-i="${i}" data-f="type">${opt(STAGE_TYPES.map(t=>[t,t]),s.type)}</select>
+      <div class="st-h"><select data-i="${i}" data-f="type">${opt(TYPES.map(t=>[t,t]),s.type)}</select>
         <label style="display:flex;align-items:center;gap:6px;flex:none;font-size:14px;color:var(--hint)">
           <input type="checkbox" data-i="${i}" data-f="done" ${s.done?'checked':''} style="width:20px;height:20px;accent-color:#22c55e">Сделано</label>
         <button class="del" data-delstage="${i}" aria-label="Удалить этап">✕</button></div>
       <div class="field"><input data-i="${i}" data-f="name" placeholder="Уточнение (необяз.), напр. «онлайн-тур»" value="${esc(s.name)}"></div>
       <div class="two"><div class="field"><label>Дата (пусто = уточняется)</label><input type="date" data-i="${i}" data-f="date" value="${esc(s.date)}"></div>
-        <div class="field"><label>До (если несколько дней)</label><input type="date" data-i="${i}" data-f="end" value="${esc(s.end)}"></div></div>
-      <div class="field" style="max-width:50%"><label>Время</label><input type="time" data-i="${i}" data-f="time" value="${esc(s.time)}"></div>
+        <div class="field"><label>${s.rep==='w'?'Повторять до':'До (если несколько дней)'}</label><input type="date" data-i="${i}" data-f="end" value="${esc(s.end)}"></div></div>
+      <div class="two"><div class="field"><label>Время</label><input type="time" data-i="${i}" data-f="time" value="${esc(s.time)}"></div>
+        <div class="field"><label>Повтор</label><select data-i="${i}" data-f="rep">${opt([['','Один раз'],['w','Каждую неделю']],s.rep||'')}</select></div></div>
     </div>`).join('');
   document.getElementById('editor').innerHTML=`
     <div class="ed-h"><button class="link" id="cancelEd" style="padding:4px">Отмена</button>
-      <b>${d._new?'Новая олимпиада':'Олимпиада'}</b><span style="width:56px"></span></div>
+      <b>${P?(d._new?'Новая подготовка':'Подготовка'):(d._new?'Новая олимпиада':'Олимпиада')}</b><span style="width:56px"></span></div>
     <div class="box">
-      <div class="field"><label>Название</label><input data-f="name" placeholder="Например, Физтех" value="${esc(d.name)}"></div>
-      <div class="two">
+      <div class="field"><label>Название</label><input data-f="name" placeholder="${P?'Например, курс к РЭ по экономике':'Например, Физтех'}" value="${esc(d.name)}"></div>
+      ${P?`<div class="field"><label>Предмет</label><select data-f="subject">${opt(subj,d.subject)}</select></div>`:`<div class="two">
         <div class="field"><label>Предмет</label><select data-f="subject">${opt(subj,d.subject)}</select></div>
         <div class="field"><label>Уровень РСОШ</label><select data-f="level">${opt(lv,d.level)}</select></div>
       </div>
       <label style="display:flex;align-items:center;gap:10px;margin:2px 4px 12px;font-weight:600">
-        <input type="checkbox" data-f="urgent" ${d.urgent?'checked':''} style="width:20px;height:20px;accent-color:#ef4444"> 🔥 Срочно</label>
+        <input type="checkbox" data-f="urgent" ${d.urgent?'checked':''} style="width:20px;height:20px;accent-color:#ef4444"> 🔥 Срочно</label>`}
       <div class="field"><label>Сайт</label><input data-f="site" inputmode="url" placeholder="https://…" value="${esc(d.site)}"></div>
       ${d.site?`<button class="link" id="openSite" style="padding:0 4px 10px">Открыть сайт ↗</button>`:''}
       <div class="field"><label>Заметка</label><textarea data-f="note" rows="2" placeholder="Логин, аудитория, что взять…">${esc(d.note)}</textarea></div>
@@ -682,7 +731,7 @@ function renderEditor(){
       : d.cred?`<button class="btn2" id="credOpen" style="background:var(--bg2)">🔒 Открыть логин и пароль</button>`
       :`<button class="btn2" id="credOpen" style="background:var(--bg2)">+ Добавить логин и пароль</button>`}
     </div>
-    <div class="group" style="margin-top:4px">Этапы и даты</div>
+    <div class="group" style="margin-top:4px">${P?'Занятия и даты':'Этапы и даты'}</div>
     <div class="box">${stages||'<div class="sub">Этапов пока нет</div>'}</div>
     <button class="btn2" id="addStage">+ Добавить этап</button>
     ${d._new?'':'<button class="btn2" id="delOly" style="color:var(--danger);margin-top:10px">Удалить олимпиаду</button>'}`;
@@ -692,6 +741,7 @@ document.getElementById('editor').addEventListener('input',e=>{
   const el=e.target, f=el.dataset.f; if(!f||!draft) return;
   const v=el.type==='checkbox'?el.checked:el.value;
   if(el.dataset.i!==undefined) draft.stages[+el.dataset.i][f]=v; else draft[f]=v;
+  if(f==='rep') renderEditor();
 });
 document.getElementById('editor').addEventListener('click',async e=>{
   const t=e.target.closest('button'); if(!t) return;
@@ -709,7 +759,7 @@ document.getElementById('editor').addEventListener('click',async e=>{
   if(t.id==='credDel'){if(await confirmAsk('Удалить логин и пароль этой олимпиады?')){draft.cred=null;draft._login=draft._pass='';draft._credOpen=false;renderEditor()}return}
   if(t.id==='addStage'){
     const last=draft.stages[draft.stages.length-1];
-    const nextType=last?STAGE_TYPES[Math.min(STAGE_TYPES.indexOf(last.type)+1,STAGE_TYPES.length-1)]:'Регистрация';
+    const nextType=isPrep(draft)?(last?last.type:'Занятие'):last?STAGE_TYPES[Math.min(STAGE_TYPES.indexOf(last.type)+1,STAGE_TYPES.length-1)]:'Регистрация';
     draft.stages.push({type:nextType,name:'',date:'',end:'',time:'',u:true}); renderEditor(); return;
   }
   if(t.dataset.delstage!==undefined){draft.stages.splice(+t.dataset.delstage,1);renderEditor();return}
@@ -736,11 +786,12 @@ if(tg&&tg.BackButton) tg.BackButton.onClick(closeEditor);
 document.querySelector('.tabs').addEventListener('click',e=>{
   const b=e.target.closest('.tab'); if(!b) return; state.tab=b.dataset.tab; render();
 });
-document.getElementById('fab').addEventListener('click',()=>openEditor(null));
+document.getElementById('fab').addEventListener('click',()=>openEditor(null,state.tab==='prep'));
 document.getElementById('main').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return;
   if(b.dataset.open){openEditor(olys.find(o=>o.id===b.dataset.open));return}
   if(b.id==='togglePast'){state.showPast=!state.showPast;render();return}
+  if(b.id==='togglePastPrep'){state.showPastPrep=!state.showPastPrep;render();return}
   if(b.id==='impBtn'){document.getElementById('impText').value='';document.getElementById('imp').classList.add('open');return}
   if(b.id==='expBtn'){doExport();return}
   if(b.dataset.day){state.sel=b.dataset.day;render();return}
