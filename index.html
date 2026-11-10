@@ -383,6 +383,8 @@ const SEED=[
   {id:'prep_oleco',kind:'prep',name:'Олэкономика',subject:'Экономика',level:'',site:'',note:'Каждый вторник и пятницу 18:00–19:30.',
    stages:[{type:'Занятие',name:'вт, до 19:30',date:'2026-11-10',end:'2027-05-31',time:'18:00',rep:'w'},
      {type:'Занятие',name:'пт, до 19:30',date:'2026-11-13',end:'2027-05-31',time:'18:00',rep:'w'}]},
+  {id:'prep_english',kind:'prep',name:'Английский',subject:'Другое',level:'',site:'',note:'Каждый день ~40 минут, в промежутке 21:00–23:00.',
+   stages:[{type:'Занятие',name:'~40 мин, между 21 и 23',date:'2026-11-10',end:'2027-05-31',time:'21:00',rep:'d'}]},
   {id:'hse_nn_eco',name:'Олимпиада по экономике (НИУ ВШЭ — Нижний Новгород)',subject:'Экономика',level:'',
    site:'',
    note:'Очно: НИУ ВШЭ — Нижний Новгород, ул. Костина, д. 2. Начало в 9:30 — прийти заранее, взять паспорт.',
@@ -501,7 +503,7 @@ function normalize(o){
     cred:o.cred&&o.cred.iv&&o.cred.ct?{iv:String(o.cred.iv),ct:String(o.cred.ct)}:null,
     ...(o.kind==='prep'?{kind:'prep'}:{}),
     stages:(o.stages||[]).map(s=>({type:(o.kind==='prep'?PREP_TYPES:STAGE_TYPES).includes(s.type)?s.type:'Другое',name:s.name||'',
-      date:/^\d{4}-\d{2}-\d{2}$/.test(s.date||'')?s.date:'',end:/^\d{4}-\d{2}-\d{2}$/.test(s.end||'')?s.end:'',time:s.time||'',done:!!s.done,...(s.u?{u:true}:{}),...(s.rep==='w'?{rep:'w'}:{})}))};
+      date:/^\d{4}-\d{2}-\d{2}$/.test(s.date||'')?s.date:'',end:/^\d{4}-\d{2}-\d{2}$/.test(s.end||'')?s.end:'',time:s.time||'',done:!!s.done,...(s.u?{u:true}:{}),...(s.rep==='w'||s.rep==='d'?{rep:s.rep}:{})}))};
 }
 function doImport(text){
   let data; try{data=JSON.parse(text.trim())}catch(e){haptic('error');toast('Не получилось прочитать текст');return false}
@@ -535,9 +537,9 @@ function delOly(id){
 function addDays(s,n){const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)}
 function events(list=olys){
   const r=[];
-  for(const o of list) for(const s of (o.stages||[])) if(s.date&&s.rep==='w'){
-    const until=s.end&&s.end>=s.date?s.end:addDays(s.date,182);
-    for(let d=s.date;d<=until;d=addDays(d,7)) r.push({o,s,start:d,end:d,occ:true});
+  for(const o of list) for(const s of (o.stages||[])) if(s.date&&(s.rep==='w'||s.rep==='d')){
+    const until=s.end&&s.end>=s.date?s.end:addDays(s.date,182), step=s.rep==='d'?1:7;
+    for(let d=s.date;d<=until;d=addDays(d,step)) r.push({o,s,start:d,end:d,occ:true,daily:s.rep==='d'});
   } else if(s.date){
     const end = s.end && s.end>=s.date ? s.end : s.date;
     r.push({o,s,start:s.date,end});
@@ -578,7 +580,7 @@ function renderUp(){
   const O=OLY();
   if(!O.length) return emptyState();
   const t=today(), ev=events(O), lim=addDays(t,14);
-  const up=ev.filter(e=>e.end>=t&&!e.s.done&&(!e.occ||e.start<=lim)), past=ev.filter(e=>!e.occ&&(e.end<t||e.s.done)).reverse();
+  const up=ev.filter(e=>e.end>=t&&!e.s.done&&(!e.occ||e.start<=(e.daily?addDays(t,1):lim))), past=ev.filter(e=>!e.occ&&(e.end<t||e.s.done)).reverse();
   const groups=[['Сейчас',[]],['Завтра',[]],['Ближайшая неделя',[]],['Ближайший месяц',[]],['Позже',[]]];
   for(const e of up){
     const n=e.start<=t?0:diffDays(t,e.start);
@@ -652,12 +654,12 @@ function renderPrep(){
   const P=PREP();
   if(!P.length) return `<div class="empty"><b>Подготовки пока нет</b>Нажми «+», чтобы добавить курс, сборы или занятия.</div>`;
   const t=today(), ev=events(P), lim=addDays(t,14);
-  const up=ev.filter(e=>e.end>=t&&!e.s.done&&(!e.occ||e.start<=lim)), past=ev.filter(e=>!e.occ&&(e.end<t||e.s.done)).reverse();
+  const up=ev.filter(e=>e.end>=t&&!e.s.done&&(!e.occ||e.start<=(e.daily?addDays(t,1):lim))), past=ev.filter(e=>!e.occ&&(e.end<t||e.s.done)).reverse();
   let h=groupRows(up,t);
   if(!up.length) h+=`<div class="empty" style="padding:24px"><b>Ближайших занятий нет</b></div>`;
   h+=`<div class="group">Курсы и программы</div>`+P.map(o=>{
     const c=color(o), left=ev.filter(e=>e.o===o&&!e.occ&&e.end>=t&&!e.s.done).length;
-    const reps=(o.stages||[]).filter(s=>s.rep==='w'&&s.date).map(s=>'каждый '+WD[(parse(s.date).getDay()+6)%7]+(s.time?' в '+esc(s.time):''));
+    const reps=(o.stages||[]).filter(s=>(s.rep==='w'||s.rep==='d')&&s.date).map(s=>(s.rep==='d'?'каждый день':'каждый '+WD[(parse(s.date).getDay()+6)%7])+(s.time?' в '+esc(s.time):''));
     return `<button class="card" data-open="${o.id}"><div class="title">${esc(o.name)}${o.cred?' 🔑':''}</div>
       <div class="sub">${reps.length?reps.join(', '):'Впереди: '+left+' '+plural(left,['событие','события','событий'])}</div>
       <div class="chips"><span class="chip" style="background:color-mix(in srgb,${c} 18%,transparent);color:${c}">${esc(o.subject||'Другое')}</span></div></button>`}).join('');
@@ -703,9 +705,9 @@ function renderEditor(){
         <button class="del" data-delstage="${i}" aria-label="Удалить этап">✕</button></div>
       <div class="field"><input data-i="${i}" data-f="name" placeholder="Уточнение (необяз.), напр. «онлайн-тур»" value="${esc(s.name)}"></div>
       <div class="two"><div class="field"><label>Дата (пусто = уточняется)</label><input type="date" data-i="${i}" data-f="date" value="${esc(s.date)}"></div>
-        <div class="field"><label>${s.rep==='w'?'Повторять до':'До (если несколько дней)'}</label><input type="date" data-i="${i}" data-f="end" value="${esc(s.end)}"></div></div>
+        <div class="field"><label>${s.rep?'Повторять до':'До (если несколько дней)'}</label><input type="date" data-i="${i}" data-f="end" value="${esc(s.end)}"></div></div>
       <div class="two"><div class="field"><label>Время</label><input type="time" data-i="${i}" data-f="time" value="${esc(s.time)}"></div>
-        <div class="field"><label>Повтор</label><select data-i="${i}" data-f="rep">${opt([['','Один раз'],['w','Каждую неделю']],s.rep||'')}</select></div></div>
+        <div class="field"><label>Повтор</label><select data-i="${i}" data-f="rep">${opt([['','Один раз'],['w','Каждую неделю'],['d','Каждый день']],s.rep||'')}</select></div></div>
     </div>`).join('');
   document.getElementById('editor').innerHTML=`
     <div class="ed-h"><button class="link" id="cancelEd" style="padding:4px">Отмена</button>
