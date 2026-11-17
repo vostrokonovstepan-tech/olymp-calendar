@@ -110,6 +110,7 @@ main{padding:0 12px 96px}
 <div class="tabs">
   <button class="tab on" data-tab="up">Скоро</button>
   <button class="tab" data-tab="reg">Регистрация<span id="regCount"></span></button>
+  <button class="tab" data-tab="waiting">Ожидаем результаты<span id="waitingCount"></span></button>
   <button class="tab" data-tab="cal">Календарь</button>
   <button class="tab" data-tab="prep">Учёба</button>
   <button class="tab" data-tab="all">Все</button>
@@ -148,6 +149,8 @@ const OLY=()=>olys.filter(o=>!isPrep(o));
 const PREP=()=>olys.filter(isPrep);
 const pendReg=o=>(o.stages||[]).find(s=>s.type==='Регистрация'&&!s.done);
 const isPendReg=s=>s.type==='Регистрация'&&!s.done;
+const hasResult=s=>['Отборочный этап','Региональный этап','Заключительный этап'].includes(s.type);
+const isWaiting=s=>hasResult(s)&&s.done&&!s.resultKnown;
 const LEVELS = {'1':'I уровень','2':'II уровень','3':'III уровень','vsosh':'ВсОШ','0':'Вне перечня'};
 const MON_G = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const MON_N = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
@@ -212,10 +215,10 @@ const SEED=[
    stages:[{type:'Регистрация',name:'',date:'2026-09-14',end:'2026-11-30',time:'',done:true},
      {type:'Отборочный этап',name:'заочно',date:'2026-12-05',end:'2026-12-06',time:''},
      {type:'Заключительный этап',name:'',date:'',end:'',time:''}]},
-  {id:'mosh_eco',v:2,name:'МОШ по экономике',subject:'Экономика',level:'3',urgent:true,site:'https://olimpiada.ru/activity/110',
-   note:'Зарегистрирован (подтверждено 17 ноября). Даты отбора и финала уточнить на официальном сайте.',
+  {id:'mosh_eco',v:3,name:'МОШ по экономике',subject:'Экономика',level:'3',urgent:true,site:'https://olimpiada.ru/activity/110',
+   note:'Зарегистрирован. Отбор по экономике 8–14 декабря 2026 (даты сообщены 17 ноября). Дату финала уточнить.',
    stages:[{type:'Регистрация',name:'',date:'',end:'',time:'',done:true},
-     {type:'Отборочный этап',name:'заочно',date:'',end:'',time:''},
+     {type:'Отборочный этап',name:'заочно',date:'2026-12-08',end:'2026-12-14',time:''},
      {type:'Заключительный этап',name:'',date:'',end:'',time:''}]},
   ...[
     ['lomo_math','Математика','Математика','2026-11-13','2026-11-20'],
@@ -226,10 +229,11 @@ const SEED=[
     stages:[{type:'Регистрация',name:'',date:'2026-10-24',end:b,time:'',done:true},
       {type:'Отборочный этап',name:'онлайн',date:a,end:b,time:''},
       {type:'Заключительный этап',name:'',date:'',end:'',time:''}]})),
-  {id:'lomo_mechanics',v:2,name:'Ломоносов — механика и математическое моделирование',subject:'Математика',level:'',
+  {id:'lomo_mechanics',v:3,name:'Ломоносов — механика и математическое моделирование',subject:'Математика',level:'',
    site:'https://olymp.msu.ru/rus/event/11016/',
-   note:'Зарегистрирован (подтверждено 17 ноября). Москва, МГУ; формат и даты этапов уточнить.',
-   stages:[{type:'Регистрация',name:'',date:'2026-10-24',end:'2026-11-27',time:'',done:true}]},
+   note:'Зарегистрирован. Отбор 20–27 ноября 2026 (даты сообщены 17 ноября). Москва, МГУ; формат и дату финала уточнить.',
+   stages:[{type:'Регистрация',name:'',date:'2026-10-24',end:'2026-11-27',time:'',done:true},
+     {type:'Отборочный этап',name:'',date:'2026-11-20',end:'2026-11-27',time:''}]},
   {id:'phystech_eng',name:'Физтех.Инженер',subject:'Физика',level:'2',site:'https://olymp.mipt-rse.ru',
    note:'Отбор написан 8 ноября — ждать результатов. Финал очно: 6 задач.',
    stages:[{type:'Регистрация',name:'',date:'2026-11-08',end:'',time:'',done:true},
@@ -304,9 +308,9 @@ const SEED=[
      {type:'Отборочный этап',name:'вариант 1',date:'2026-11-21',end:'',time:''},
      {type:'Отборочный этап',name:'вариант 2',date:'2026-11-29',end:'',time:''},
      {type:'Заключительный этап',name:'МЭИ',date:'',end:'',time:''}]},
-  {id:'mosh_phys',name:'МОШ — физика',subject:'Физика',level:'1',site:'https://olimpiada.ru/activity/130',
+  {id:'mosh_phys',v:2,name:'МОШ — физика',subject:'Физика',level:'1',site:'https://olimpiada.ru/activity/130',
    note:'Отбор пройден: 25 из 25. Финал очно (предварительно 28 фев) — уточнить дату и площадку. Даёт БВИ в МФТИ (победителям).',
-   stages:[{type:'Отборочный этап',name:'25/25',date:'2026-10-15',end:'2026-10-22',time:'',done:true},
+   stages:[{type:'Отборочный этап',name:'25/25',date:'2026-10-15',end:'2026-10-22',time:'',done:true,resultKnown:true},
      {type:'Заключительный этап',name:'очно, предварительно',date:'2027-02-28',end:'',time:''}]},
   {id:'sibir_phys',v:2,name:'Будущее Сибири — физика',subject:'Физика',level:'3',site:'https://olymp-sibir.nstu.ru/',
    note:'Зарегистрирован. Отбор онлайн 6 декабря. Финал в феврале — формат уточнить (не из Сибири ли только очно).',
@@ -378,9 +382,9 @@ const SEED=[
      {type:'Отборочный этап',name:'академическое, онлайн',date:'2026-10-23',end:'2026-12-07',time:''},
      {type:'Отборочный этап',name:'предзащита научной работы',date:'',end:'',time:''},
      {type:'Заключительный этап',name:'',date:'',end:'',time:''}]},
-  {id:'nto',name:'НТО — 3 профиля',subject:'Физика',level:'2',urgent:true,site:'https://ntcontest.ru',
+  {id:'nto',v:2,name:'НТО — 3 профиля',subject:'Физика',level:'2',urgent:true,site:'https://ntcontest.ru',
    note:'Участвую по трём профилям, 1 этап пройден. 10 ноября — формирование команд и старт 2 (командного) этапа, 12:00 МСК. Командный этап до 7 дек (ручная проверка) / до 11 дек (автопроверка) — проверить по своим профилям. Уровень у профилей II–III.',
-   stages:[{type:'Отборочный этап',name:'1 этап',date:'2026-11-03',end:'',time:'',done:true},
+   stages:[{type:'Отборочный этап',name:'1 этап',date:'2026-11-03',end:'',time:'',done:true,resultKnown:true},
      {type:'Другое',name:'Формирование команд + старт 2 этапа',date:'2026-11-10',end:'',time:'12:00'},
      {type:'Отборочный этап',name:'2 этап, командный',date:'2026-11-10',end:'2026-12-07',time:''},
      {type:'Заключительный этап',name:'',date:'',end:'',time:''}]},
@@ -430,7 +434,7 @@ function mergeSeed(o,s){
   n.cred=o.cred||null;
   n.urgent=s.urgent?!!o.urgent:false;
   const key=x=>x.type+'|'+(x.name||'');
-  n.stages=n.stages.map(st=>{const m=(o.stages||[]).find(u=>key(u)===key(st));return {...st,done:!!(st.done||(m&&m.done))}});
+  n.stages=n.stages.map(st=>{const m=(o.stages||[]).find(u=>key(u)===key(st));return {...st,done:!!(st.done||(m&&m.done)),resultKnown:!!(st.resultKnown||(m&&m.resultKnown))}});
   for(const u of (o.stages||[])) if(u.u) n.stages.push(u);
   return n;
 }
@@ -519,7 +523,7 @@ function normalize(o){
     cred:o.cred&&o.cred.iv&&o.cred.ct?{iv:String(o.cred.iv),ct:String(o.cred.ct)}:null,
     ...(o.kind==='prep'?{kind:'prep'}:{}),
     stages:(o.stages||[]).map(s=>({type:(o.kind==='prep'?PREP_TYPES:STAGE_TYPES).includes(s.type)?s.type:'Другое',name:s.name||'',
-      date:/^\d{4}-\d{2}-\d{2}$/.test(s.date||'')?s.date:'',end:/^\d{4}-\d{2}-\d{2}$/.test(s.end||'')?s.end:'',time:s.time||'',done:!!s.done,...(s.u?{u:true}:{}),...(s.rep==='w'||s.rep==='d'?{rep:s.rep}:{})}))};
+      date:/^\d{4}-\d{2}-\d{2}$/.test(s.date||'')?s.date:'',end:/^\d{4}-\d{2}-\d{2}$/.test(s.end||'')?s.end:'',time:s.time||'',done:!!s.done,...(s.resultKnown?{resultKnown:true}:{}),...(s.u?{u:true}:{}),...(s.rep==='w'||s.rep==='d'?{rep:s.rep}:{})}))};
 }
 function doImport(text){
   let data; try{data=JSON.parse(text.trim())}catch(e){haptic('error');toast('Не получилось прочитать текст');return false}
@@ -687,6 +691,19 @@ function renderReg(){
       <span class="right">${dl?'до '+fmt(dl):opens?'с '+fmt(opens):''}<br>${badge}</span></button>`}).join('')}</div>`;
 }
 
+function renderWaiting(){
+  const pending=OLY().flatMap(o=>(o.stages||[]).filter(isWaiting).map(s=>({o,s})));
+  pending.sort((a,b)=>(b.s.end||b.s.date||'').localeCompare(a.s.end||a.s.date||''));
+  if(!pending.length) return `<div class="empty"><b>Пока ничего не ждём</b>Написал этап — отметь «Сделано» в его карточке. Он появится здесь до получения результата.</div>`;
+  return `<div class="sub" style="margin:4px 4px 8px">Когда узнаешь результат, открой карточку и отметь «Результат получен» у написанного этапа.</div>
+    <div class="list">${pending.map(({o,s})=>`<button class="row" data-open="${esc(o.id)}">
+      <span class="bar" style="background:${color(o)}"></span>
+      <span class="grow"><div class="title">${esc(o.name)}</div>
+        <div class="sub">${esc(o.subject)} · ${stageLabel(s)}</div>
+        ${s.date?`<div class="sub">Срок этапа: ${fmtRange(s.date,s.end)}</div>`:''}</span>
+      <span class="right"><span class="badge b-later">Ждём</span></span></button>`).join('')}</div>`;
+}
+
 function renderPrep(){
   const P=PREP();
   if(!P.length) return `<div class="empty"><b>Подготовки пока нет</b>Нажми «+», чтобы добавить курс, сборы или занятия.</div>`;
@@ -710,7 +727,9 @@ function renderPrep(){
 function render(){
   document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===state.tab));
   const main=document.getElementById('main');
-  main.innerHTML = state.tab==='up'?renderUp():state.tab==='reg'?renderReg():state.tab==='cal'?renderCal():state.tab==='prep'?renderPrep():renderAll();
+  main.innerHTML = state.tab==='up'?renderUp():state.tab==='reg'?renderReg():state.tab==='waiting'?renderWaiting():state.tab==='cal'?renderCal():state.tab==='prep'?renderPrep():renderAll();
+  const waiting=OLY().reduce((n,o)=>n+(o.stages||[]).filter(isWaiting).length,0);
+  document.getElementById('waitingCount').innerHTML=waiting?`<span class="cnt">${waiting}</span>`:'';
   const n=OLY().filter(pendReg).length;document.getElementById('regCount').innerHTML=n?`<span class="cnt">${n}</span>`:'';
 }
 
@@ -741,6 +760,8 @@ function renderEditor(){
         <label style="display:flex;align-items:center;gap:6px;flex:none;font-size:14px;color:var(--hint)">
           <input type="checkbox" data-i="${i}" data-f="done" ${s.done?'checked':''} style="width:20px;height:20px;accent-color:#22c55e">Сделано</label>
         <button class="del" data-delstage="${i}" aria-label="Удалить этап">✕</button></div>
+      ${!P&&hasResult(s)?`<label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:14px;color:var(--hint)">
+        <input type="checkbox" data-i="${i}" data-f="resultKnown" ${s.resultKnown?'checked':''} ${!s.done?'disabled':''} style="width:20px;height:20px;accent-color:#22c55e">Результат получен</label>`:''}
       <div class="field"><input data-i="${i}" data-f="name" placeholder="Уточнение (необяз.), напр. «онлайн-тур»" value="${esc(s.name)}"></div>
       <div class="two"><div class="field"><label>Дата (пусто = уточняется)</label><input type="date" data-i="${i}" data-f="date" value="${esc(s.date)}"></div>
         <div class="field"><label>${s.rep?'Повторять до':'До (если несколько дней)'}</label><input type="date" data-i="${i}" data-f="end" value="${esc(s.end)}"></div></div>
@@ -784,7 +805,8 @@ document.getElementById('editor').addEventListener('input',e=>{
   const el=e.target, f=el.dataset.f; if(!f||!draft) return;
   const v=el.type==='checkbox'?el.checked:el.value;
   if(el.dataset.i!==undefined) draft.stages[+el.dataset.i][f]=v; else draft[f]=v;
-  if(f==='rep') renderEditor();
+  if(f==='done'&&!v&&el.dataset.i!==undefined) draft.stages[+el.dataset.i].resultKnown=false;
+  if(['rep','done','type'].includes(f)) renderEditor();
 });
 document.getElementById('editor').addEventListener('click',async e=>{
   const t=e.target.closest('button'); if(!t) return;
