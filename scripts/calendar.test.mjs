@@ -20,7 +20,7 @@ test('waiting list contains written stages with unknown results, including unkno
   const api = app();
   api.setRecords(api.SEED);
   const html = api.renderWaiting();
-  for (const id of ['ranepa_eco', 'shvb_math', 'phystech_eng']) assert(html.includes(`data-open="${id}"`));
+  for (const id of ['ranepa_eco', 'shvb_math', 'phystech_eng', 'vp_eng']) assert(html.includes(`data-open="${id}"`));
   for (const id of ['mosh_phys', 'nto', 'mosh_eco', 'lomo_mechanics']) assert(!html.includes(`data-open="${id}"`));
   assert(api.isWaiting({ type: 'Отборочный этап', done: true, date: '' }));
   assert(!api.isWaiting({ type: 'Регистрация', done: true }));
