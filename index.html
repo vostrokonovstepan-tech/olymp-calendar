@@ -245,10 +245,10 @@ const SEED=[
    site:'https://olymp.bmstu.ru',
    note:'Отбор написан 16 ноября 2026. Ждать результатов. Площадка: АНОО «Школа №800», Нижний Новгород.',
    stages:[{type:'Отборочный этап',name:'очно, Школа №800',date:'2026-11-16',end:'',time:'10:00',done:true}]},
-  {id:'bibn_rus',name:'Будущие исследователи — будущее науки (Би-Бн)',subject:'Русский язык',level:'3',urgent:true,
+  {id:'bibn_rus',v:2,name:'Будущие исследователи — будущее науки (Би-Бн)',subject:'Русский язык',level:'3',urgent:true,
    site:'https://bibn.unn.ru/reg/',
-   note:'СРОЧНО зарегистрироваться на bibn.unn.ru/reg/ и загрузить Согласие, подписанное родителями (ждать «Ждем вас на олимпиаде!»). Отбор в воскресенье 29 ноября в 9:30 — по воскресеньям пишут в ННГУ. Финал 24 января, только очно.',
-   stages:[{type:'Регистрация',name:'+ согласие от родителей',date:'2026-11-09',end:'2026-11-27',time:''},
+   note:'Зарегистрирован (подтверждено 17 ноября). Отбор в воскресенье 29 ноября в 9:30 — по воскресеньям пишут в ННГУ. Финал 24 января, только очно.',
+   stages:[{type:'Регистрация',name:'+ согласие от родителей',date:'2026-11-09',end:'2026-11-27',time:'',done:true},
      {type:'Отборочный этап',name:'очно',date:'2026-11-29',end:'',time:'09:30'},
      {type:'Заключительный этап',name:'очно',date:'2027-01-24',end:'',time:''}]},
   ...[['izum_math','Математика','Математика','3'],['izum_phys','Физика','Физика',''],['izum_eng','Инженерные науки','Физика','']]
@@ -263,9 +263,9 @@ const SEED=[
       {type:'Отборочный этап',name:'интернет-тур',date:'2026-11-17',end:'2026-12-21',time:''},
       {type:'Отборочный этап',name:'очный тур (по желанию)',date:'2026-11-28',end:'',time:''},
       {type:'Заключительный этап',name:'',date:'',end:'',time:''}]})),
-  {id:'ingeneer_phys',name:'Инженерная олимпиада школьников',subject:'Физика',level:'1',urgent:true,site:'https://www.ucheba.ru/for-abiturients/olympiads/5',
-   note:'Нужно зарегистрироваться. Онлайн-отбор 17 ноя – 21 дек. Финал в январе, есть площадка в Нижнем. Важна для МИФИ.',
-   stages:[{type:'Регистрация',name:'',date:'2026-11-09',end:'2026-11-16',time:''},
+  {id:'ingeneer_phys',v:2,name:'Инженерная олимпиада школьников',subject:'Физика',level:'1',urgent:true,site:'https://www.ucheba.ru/for-abiturients/olympiads/5',
+   note:'Зарегистрирован, успел до закрытия регистрации (подтверждено 17 ноября). Онлайн-отбор 17 ноя – 21 дек. Финал в январе, есть площадка в Нижнем. Важна для МИФИ.',
+   stages:[{type:'Регистрация',name:'',date:'2026-11-09',end:'2026-11-16',time:'',done:true},
      {type:'Отборочный этап',name:'онлайн',date:'2026-11-17',end:'2026-12-21',time:''},
      {type:'Заключительный этап',name:'январь, Нижний Новгород',date:'',end:'',time:''}]},
   {id:'internet_phys',name:'Интернет-олимпиада по физике (СПбГУ/ИТМО)',subject:'Физика',level:'2',site:'https://distolymp.spbu.ru/phys/olymp/barsic1197_distolymp.zip',
@@ -330,9 +330,9 @@ const SEED=[
    stages:[{type:'Отборочный этап',name:'онлайн',date:'',end:'',time:''},
      {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]},
   ...[['zvezda_tech','Техника и технологии','1','Выбрать одно из 13 направлений (приборостроение, машиностроение, мехатроника…). '],
-      ['zvezda_nat','Естественные науки (физика)','2','']].map(([id,prof,lv,extra])=>({id,v:id==='zvezda_nat'?2:1,name:'Звезда — '+prof,subject:'Физика',level:lv,urgent:true,
+      ['zvezda_nat','Естественные науки (физика)','2','']].map(([id,prof,lv,extra])=>({id,v:id==='zvezda_nat'?3:1,name:'Звезда — '+prof,subject:'Физика',level:lv,urgent:true,
     site:'https://zvportal.susu.ru',
-    note:extra+(id==='zvezda_nat'?'Зарегистрирован по физике. ':'')+'Регистрация в личном кабинете zvportal.susu.ru. Интернет-тур отбора онлайн 9 ноя – 9 дек (очный вариант до 20 дек — площадку в Нижнем не нашёл). Даты финала пока не опубликованы.',
+    note:extra+(id==='zvezda_nat'?'Зарегистрирован по физике (подтверждено 17 ноября).':'Регистрация в личном кабинете zvportal.susu.ru.')+' Интернет-тур отбора онлайн 9 ноя – 9 дек (очный вариант до 20 дек — площадку в Нижнем не нашёл). Даты финала пока не опубликованы.',
     stages:[{type:'Регистрация',name:'личный кабинет',date:'2026-11-09',end:'2026-12-01',time:'',done:id==='zvezda_nat'},
       {type:'Отборочный этап',name:'интернет-тур',date:'2026-11-09',end:'2026-12-09',time:''},
       {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]})),
@@ -572,6 +572,12 @@ function when(e){
   if(n===1) return {txt:'завтра',cls:'b-soon'};
   return {txt:'через '+n+' '+plural(n,['день','дня','дней']),cls:n<=7?'b-soon':'b-later'};
 }
+function urgentCountdown(s){
+  if(!s) return {txt:'срок уточняется',cls:'b-later'};
+  const n=diffDays(today(),s.end||s.date);
+  return {txt:n===0?'сегодня':n===1?'завтра':'осталось '+n+' '+plural(n,['день','дня','дней']),
+    cls:n<=3?'b-now':n<=7?'b-soon':'b-later'};
+}
 function eventRow(e){
   const w=when(e), isReg=e.s.type==='Регистрация';
   return `<button class="row" data-open="${e.o.id}">
@@ -606,12 +612,13 @@ function renderUp(){
   const dl=o=>{const s=(o.stages||[]).filter(s=>s.date&&!s.done&&(s.end||s.date)>=t).sort((a,b)=>(a.end||a.date).localeCompare(b.end||b.date))[0];return s?(s.end||s.date):'9999'};
   const urg=O.filter(o=>o.urgent&&!pendReg(o)).sort((a,b)=>dl(a).localeCompare(dl(b)));
   if(urg.length) h+=`<div class="group" style="color:#ef4444">🔥 Срочно</div><div class="list">${urg.map(o=>{
-    const s=(o.stages||[]).filter(s=>s.date&&!s.done&&(s.end||s.date)>=t).sort((a,b)=>a.date.localeCompare(b.date))[0];
+    const s=(o.stages||[]).filter(s=>s.date&&!s.done&&(s.end||s.date)>=t).sort((a,b)=>(a.end||a.date).localeCompare(b.end||b.date))[0];
+    const countdown=urgentCountdown(s);
     const u=(o.stages||[]).find(s=>!s.date&&!s.done);
     const right=s?(s.end&&s.end!==s.date&&s.date<=t?'до '+fmt(s.end):fmtRange(s.date,s.end)):'дата уточняется';
     return `<button class="row" data-open="${o.id}"><span class="bar" style="background:#ef4444"></span>
       <span class="grow"><div class="title">${esc(o.name)}</div><div class="sub">${s?stageLabel(s):u?stageLabel(u):''}</div></span>
-      <span class="right">${right}</span></button>`}).join('')}</div>`;
+      <span class="right">${right}<br><span class="badge ${countdown.cls}">${countdown.txt}</span></span></button>`}).join('')}</div>`;
   for(const [name,list] of groups) if(list.length) h+=`<div class="group">${name}</div><div class="list">${list.map(eventRow).join('')}</div>`;
   const tbd=[];
   for(const o of O) for(const s of (o.stages||[])) if(!s.date&&!s.done&&!isPendReg(s)) tbd.push({o,s});
