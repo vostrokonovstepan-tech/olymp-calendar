@@ -76,11 +76,14 @@ export async function sendTelegram(text, { token, chatId, fetchImpl = fetch }) {
 
 async function main() {
   const dryRun = process.argv.includes('--dry-run') || process.env.DRY_RUN === 'true';
+  const testNotification = process.argv.includes('--test') || process.env.TEST_NOTIFICATION === 'true';
   if (!dryRun && (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID)) {
     throw new Error('Добавьте секреты TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в GitHub Actions');
   }
   const target = tomorrowInMoscow();
-  const texts = messages(reminders(JSON.parse(await readCalendar()), target), target);
+  const texts = testNotification
+    ? ['🔔 Пробное уведомление календаря олимпиад.\n\nБот может присылать сообщения в этот чат. Напоминания запланированы ежедневно на 07:00 МСК, за день до начала или окончания этапов.']
+    : messages(reminders(JSON.parse(await readCalendar()), target), target);
   if (dryRun) { console.log(texts.join('\n\n---\n\n') || 'На завтра напоминаний нет'); return; }
   for (const text of texts) await sendTelegram(text, {
     token: process.env.TELEGRAM_BOT_TOKEN, chatId: process.env.TELEGRAM_CHAT_ID,

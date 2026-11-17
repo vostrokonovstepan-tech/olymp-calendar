@@ -10,6 +10,10 @@ on:
         description: 'Только проверить, без отправки в Telegram'
         type: boolean
         default: true
+      test_notification:
+        description: 'Отправить пробное сообщение независимо от завтрашних событий'
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths:
@@ -49,4 +53,5 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
+          TEST_NOTIFICATION: ${{ github.event_name == 'workflow_dispatch' && inputs.test_notification && 'true' || 'false' }}
         run: node scripts/remind.mjs

@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { readCalendar, tomorrowInMoscow, reminders, messages, sendTelegram } from './remind.mjs';
 
 const target = '2026-11-18';
@@ -50,8 +51,17 @@ test('repository calendar is read directly, with existing done flags', async () 
   const calendar = JSON.parse(await readCalendar());
   assert(calendar.find(o => o.id === 'bibn_rus').stages[0].done);
   assert(calendar.find(o => o.id === 'ingeneer_phys').stages[0].done);
+  assert(calendar.find(o => o.id === 'lomo_mechanics').stages[0].done);
   assert(reminders(calendar, '2026-11-21').some(s => /Высшая проба.*Экономика/.test(s)));
   assert(!reminders(calendar, '2026-11-27').some(s => /Би-Бн.*Русский язык.*\nРегистрация/.test(s)));
+});
+
+test('test message is available without a calendar event and dry-run never sends', () => {
+  const text = execFileSync(process.execPath, [new URL('./remind.mjs', import.meta.url).pathname, '--test', '--dry-run'], {
+    encoding: 'utf8', env: { ...process.env, TELEGRAM_BOT_TOKEN: '', TELEGRAM_CHAT_ID: '' },
+  });
+  assert.match(text, /Пробное уведомление/);
+  assert.match(text, /07:00 МСК/);
 });
 
 test('Telegram delivery: private payload, no formatting mode, success checked', async () => {
