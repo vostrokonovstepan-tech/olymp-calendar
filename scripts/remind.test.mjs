@@ -52,7 +52,9 @@ test('repository calendar is read directly, with existing done flags', async () 
   assert(calendar.find(o => o.id === 'bibn_rus').stages[0].done);
   assert(calendar.find(o => o.id === 'ingeneer_phys').stages[0].done);
   assert(calendar.find(o => o.id === 'lomo_mechanics').stages[0].done);
-  assert(reminders(calendar, '2026-11-21').some(s => /Высшая проба.*Экономика/.test(s)));
+  const economy = calendar.find(o => o.id === 'vp_eco');
+  assert(economy.stages.find(s => s.type === 'Отборочный этап').done);
+  assert(!reminders(calendar, '2026-11-21').some(s => /Высшая проба.*Экономика/.test(s)));
   assert(!reminders(calendar, '2026-11-27').some(s => /Би-Бн.*Русский язык.*\nРегистрация/.test(s)));
 });
 
