@@ -200,7 +200,6 @@ const SEED=[
     ['vp_math','Математика','Математика',2,'2 тур','2026-11-20','09:00',20],
     ['vp_eco','Экономика','Экономика',3,'2 тур (16-го занят ШВБ — пишу 21-го)','2026-11-21','15:30',21],
     ['vp_eng','Инженерные науки','Физика',2,'2 тур','2026-11-15','15:00',15],
-    ['vp_fin','Финансовая грамотность','Экономика',1,'2 тур','2026-11-22','13:00']
   ].map(([id,prof,subj,v,tour,date,time,writtenDay])=>({id,v,name:'Высшая проба — '+prof,subject:subj,level:'',site:'https://olymp.hse.ru/mmo/',
     note:(writtenDay?`2 тур отборочного этапа написан ${writtenDay} ноября 2026. Ждём результатов. `:'Прошёл на 2 тур отборочного этапа (онлайн, время МСК). ')+'Финал очно 5–15 фев 2027, точная дата профиля — в расписании на сайте.',
     stages:[{type:'Отборочный этап',name:tour,date,end:'',time,...(writtenDay?{done:true}:{})},
@@ -425,7 +424,7 @@ const SEED=[
 /* Обновления от Claude: у олимпиады в SEED есть версия v. Если она выросла —
    карточка обновляется (даты, этапы, заметка), но твои галочки «Сделано»,
    снятый 🔥, логин/пароль и добавленные тобой этапы сохраняются. */
-const REMOVED=['spbu_math','kurchatov_math','itmo_math','vp_bus'];
+const REMOVED=['spbu_math','kurchatov_math','itmo_math','vp_bus','vp_fin'];
 async function getKV(k){let v=null;try{v=localStorage.getItem(k)}catch(e){}
   if(useCS){try{const c=await csCall('getItem',k);if(c)v=c}catch(e){}}return v}
 function setKV(k,v){try{localStorage.setItem(k,v)}catch(e){} if(useCS)csCall('setItem',k,v).catch(()=>{})}
