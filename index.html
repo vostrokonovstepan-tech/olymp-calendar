@@ -295,15 +295,15 @@ const SEED=[
    note:'Расписание 2026/27 не нашёл. В прошлом году отбор онлайн 26 окт – 23 ноя — проверить на сайте СРОЧНО, может уже идти. Финал очно (Казань).',
    stages:[{type:'Отборочный этап',name:'онлайн — проверить даты',date:'',end:'',time:''},
      {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]},
-  {id:'hope_math',name:'Надежда энергетики — математика',subject:'Математика',level:'',site:'https://www.energy-hope.ru/',
-   note:'Зарегистрирован. Отбор — один из дней: 22 или 28 ноября (писать можно один раз). Финал в МЭИ.',
-   stages:[{type:'Регистрация',name:'',date:'2026-11-10',end:'',time:'',done:true},
+  {id:'hope_math',v:2,name:'Надежда энергетики — математика',subject:'Математика',level:'',site:'https://www.energy-hope.ru/',
+   note:'Не зарегистрирован (уточнено 22 ноября 2026). Проверить, открыта ли регистрация на оставшийся тур. В прежнем календаре отбор 22 или 28 ноября; актуальные даты и условия подтвердить на сайте. Финал в МЭИ.',
+   stages:[{type:'Регистрация',name:'',date:'',end:'',time:'',done:false},
      {type:'Отборочный этап',name:'вариант 1',date:'2026-11-22',end:'',time:''},
      {type:'Отборочный этап',name:'вариант 2',date:'2026-11-28',end:'',time:''},
      {type:'Заключительный этап',name:'МЭИ',date:'',end:'',time:''}]},
-  {id:'hope_phys',v:2,name:'Надежда энергетики — физика',subject:'Физика',level:'3',site:'https://www.energy-hope.ru/',
-   note:'Зарегистрирован. Отбор — один из дней: 21 или 29 ноября (дистанционно или на площадке). Писать можно только один раз. Финал в МЭИ.',
-   stages:[{type:'Регистрация',name:'+ выбрать дату',date:'2026-11-09',end:'2026-11-20',time:'',done:true},
+  {id:'hope_phys',v:3,name:'Надежда энергетики — физика',subject:'Физика',level:'3',site:'https://www.energy-hope.ru/',
+   note:'Не зарегистрирован (уточнено 22 ноября 2026). Проверить, открыта ли регистрация на оставшийся тур. В прежнем календаре отбор 21 или 29 ноября, писать можно один раз; актуальные даты и условия подтвердить на сайте. Ранее стоял срок регистрации 20 ноября — он не подтверждён. Финал в МЭИ.',
+   stages:[{type:'Регистрация',name:'+ выбрать дату',date:'',end:'',time:'',done:false},
      {type:'Отборочный этап',name:'вариант 1',date:'2026-11-21',end:'',time:''},
      {type:'Отборочный этап',name:'вариант 2',date:'2026-11-29',end:'',time:''},
      {type:'Заключительный этап',name:'МЭИ',date:'',end:'',time:''}]},
@@ -424,16 +424,20 @@ const SEED=[
 /* Обновления от Claude: у олимпиады в SEED есть версия v. Если она выросла —
    карточка обновляется (даты, этапы, заметка), но твои галочки «Сделано»,
    снятый 🔥, логин/пароль и добавленные тобой этапы сохраняются. */
+// Explicit corrections apply once; later registrations marked by the user stay complete.
+const REGISTRATION_RESETS={hope_math:2,hope_phys:3};
 const REMOVED=['spbu_math','kurchatov_math','itmo_math','vp_bus','vp_fin'];
 async function getKV(k){let v=null;try{v=localStorage.getItem(k)}catch(e){}
   if(useCS){try{const c=await csCall('getItem',k);if(c)v=c}catch(e){}}return v}
 function setKV(k,v){try{localStorage.setItem(k,v)}catch(e){} if(useCS)csCall('setItem',k,v).catch(()=>{})}
-function mergeSeed(o,s){
+function mergeSeed(o,s,previousVersion=Infinity){
   const n=JSON.parse(JSON.stringify(s)); delete n.v;
   n.cred=o.cred||null;
   n.urgent=s.urgent?!!o.urgent:false;
+  const reset=REGISTRATION_RESETS[s.id];
+  const resetRegistration=reset&&previousVersion<reset&&(s.v||1)>=reset;
   const key=x=>x.type+'|'+(x.name||'');
-  n.stages=n.stages.map(st=>{const m=(o.stages||[]).find(u=>key(u)===key(st));return {...st,done:!!(st.done||(m&&m.done)),resultKnown:!!(st.resultKnown||(m&&m.resultKnown))}});
+  n.stages=n.stages.map(st=>{const m=(o.stages||[]).find(u=>key(u)===key(st));return {...st,done:resetRegistration&&st.type==='Регистрация'?false:!!(st.done||(m&&m.done)),resultKnown:!!(st.resultKnown||(m&&m.resultKnown))}});
   for(const u of (o.stages||[])) if(u.u) n.stages.push(u);
   return n;
 }
@@ -446,7 +450,7 @@ async function applySeed(){
   const todo=SEED.filter(s=>!done.includes(s.id));
   for(const s of todo){ if(!olys.some(o=>o.id===s.id)){const n=JSON.parse(JSON.stringify(s));delete n.v;saveOly(n)} vmap[s.id]=s.v||1; vChanged=true; }
   if(todo.length) setKV('seeded_ids',[...new Set(done.concat(todo.map(s=>s.id)).filter(Boolean))].join(','));
-  for(const s of SEED){ const v=s.v||1; if(v>(vmap[s.id]||1)){ const o=olys.find(x=>x.id===s.id); if(o){saveOly(mergeSeed(o,s));updated++} vmap[s.id]=v; vChanged=true; } }
+  for(const s of SEED){ const v=s.v||1; if(v>(vmap[s.id]||1)){ const o=olys.find(x=>x.id===s.id); if(o){saveOly(mergeSeed(o,s,vmap[s.id]||1));updated++} vmap[s.id]=v; vChanged=true; } }
   for(const id of REMOVED){ if(vmap[id]!==-1){ if(olys.some(o=>o.id===id)){delOly(id);updated++} vmap[id]=-1; vChanged=true; } }
   if(vChanged) setKV('seed_v',JSON.stringify(vmap));
   if(updated) toast('Обновлено от Claude: '+updated);

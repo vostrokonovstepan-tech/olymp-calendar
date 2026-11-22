@@ -56,3 +56,24 @@ test('mechanics selection has its own dates while registration remains complete'
   assert.equal(stage.end, '2026-11-27');
   assert(!stage.done);
 });
+
+test('incorrect energy registrations reset once; later user registration survives updates', () => {
+  const api = app();
+  for (const [id, oldVersion] of [['hope_math', 1], ['hope_phys', 2]]) {
+    const seed = api.SEED.find(o => o.id === id);
+    const previous = { ...seed, cred: { iv: 'saved', ct: 'encrypted' }, stages: seed.stages.map(s => ({ ...s, done: true })) };
+    const corrected = api.mergeSeed(previous, seed, oldVersion);
+    const registration = corrected.stages.find(s => s.type === 'Регистрация');
+    assert.equal(registration.done, false);
+    assert.equal(registration.date, '');
+    assert.equal(registration.end, '');
+    assert.equal(corrected.cred.ct, 'encrypted');
+    assert(corrected.stages.filter(s => s.type !== 'Регистрация').every(s => s.done));
+    registration.done = true;
+    const future = api.mergeSeed(corrected, { ...seed, v: seed.v + 1 }, seed.v);
+    assert(future.stages.find(s => s.type === 'Регистрация').done);
+    // A device that skipped this release also receives the correction later.
+    const skipped = api.mergeSeed(previous, { ...seed, v: seed.v + 1 }, oldVersion);
+    assert.equal(skipped.stages.find(s => s.type === 'Регистрация').done, false);
+  }
+});
