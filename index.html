@@ -364,11 +364,6 @@ const SEED=[
    note:'Отбор онлайн до 15 января. Уровень по экономике не проверял.',
    stages:[{type:'Отборочный этап',name:'онлайн — сдать до',date:'2026-11-01',end:'2027-01-15',time:''},
      {type:'Заключительный этап',name:'очно',date:'',end:'',time:''}]},
-  {id:'innop_math',v:2,name:'Innopolis Open — математика',subject:'Математика',level:'2',site:'https://www.ucheba.ru/for-abiturients/olympiads/98/subject/1',
-   note:'Зарегистрирован. Второй онлайн-отбор 28–29 ноября (первый был в октябре). Финал очно в Иннополисе 5–7 марта. В списке МФТИ на 100 баллов.',
-   stages:[{type:'Регистрация',name:'',date:'2026-11-09',end:'',time:'',done:true},
-     {type:'Отборочный этап',name:'2 онлайн-тур',date:'2026-11-28',end:'2026-11-29',time:''},
-     {type:'Заключительный этап',name:'Иннополис',date:'2027-03-05',end:'2027-03-07',time:''}]},
   ...[['belch_math','Бельчонок (СФУ) — математика','2027-01-12']].map(([id,n,d])=>({id,name:n,subject:'Математика',level:'3',site:'',
     note:'III уровень: задания проще, отбор онлайн. В МФТИ не засчитают, в других вузах — может дать 100 баллов.',
     stages:[{type:'Отборочный этап',name:d?'онлайн — сдать до':'онлайн, дек–янв',date:d,end:'',time:''},
@@ -426,7 +421,7 @@ const SEED=[
    снятый 🔥, логин/пароль и добавленные тобой этапы сохраняются. */
 // Explicit corrections apply once; later registrations marked by the user stay complete.
 const REGISTRATION_RESETS={hope_math:2,hope_phys:3};
-const REMOVED=['spbu_math','kurchatov_math','itmo_math','vp_bus','vp_fin'];
+const REMOVED=['spbu_math','kurchatov_math','itmo_math','vp_bus','vp_fin','innop_math'];
 async function getKV(k){let v=null;try{v=localStorage.getItem(k)}catch(e){}
   if(useCS){try{const c=await csCall('getItem',k);if(c)v=c}catch(e){}}return v}
 function setKV(k,v){try{localStorage.setItem(k,v)}catch(e){} if(useCS)csCall('setItem',k,v).catch(()=>{})}
